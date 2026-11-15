@@ -6,8 +6,9 @@ import { GoogleGenAI, Type } from '@google/genai';
 import {
   applyLocalAIAssistantCommand,
   compileProjectToCode,
+  isImageReplaceCommand,
 } from './src/utils/designEngine';
-import { DesignElement, DesignProject } from './src/types/design';
+import { DesignElement, DesignProject, Language } from './src/types/design';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 function isRealKey(val?: string): boolean {
   if (!val) return false;
@@ -127,13 +128,28 @@ Preserve all pages, texts, images, exact colors, typography, spacing, and respon
 
 app.post('/api/ai-assistant', async (req, res) => {
   try {
-    const { element, prompt } = req.body as {
+    const { element, prompt, lang = 'ru' } = req.body as {
       element?: DesignElement;
       prompt?: string;
+      lang?: Language;
     };
 
     if (!element || !prompt) {
       res.status(400).json({ error: 'Element and prompt are required.' });
+      return;
+    }
+
+    // If the user explicitly asked to replace/change an image, never fabricate a nonexistent path;
+    // return requiresImageSelection: true so the Studio UI prompts the user to select/upload a real asset.
+    if (isImageReplaceCommand(prompt)) {
+      const imgResult = applyLocalAIAssistantCommand(element, prompt, lang);
+      res.json({
+        updated: imgResult.updated,
+        summary: imgResult.summary,
+        requiresImageSelection: true,
+        provider: 'local-engine',
+        deepseekConfigured: false,
+      });
       return;
     }
 
@@ -208,20 +224,20 @@ app.post('/api/ai-assistant', async (req, res) => {
           },
         });
 
-        const localPreview = applyLocalAIAssistantCommand(element, prompt);
+        const localPreview = applyLocalAIAssistantCommand(element, prompt, lang);
         const response = await ai.models.generateContent({
           model: 'gemini-4-hydrogen',
           contents: `You are a senior UI designer modifying a design element in SITECRAFT.
 User command: "${prompt}"
+Preferred summary language: "${lang === 'ru' ? 'Russian' : 'English'}"
 Current element name: "${element.name}", type: "${element.type}", content: "${element.metadata.content}", background: "${element.styles.background}", color: "${element.styles.color}".
-Provide a concise 1-sentence summary of the design enhancement applied and optionally improved text content if the user asked to rewrite copy.`,
+Provide a concise 1-sentence summary of the design enhancement applied in ${lang === 'ru' ? 'Russian' : 'English'}.`,
           config: {
             responseMimeType: 'application/json',
             responseSchema: {
               type: Type.OBJECT,
               properties: {
                 summary: { type: Type.STRING },
-                improvedTextContent: { type: Type.STRING },
               },
             },
           },
@@ -243,10 +259,11 @@ Provide a concise 1-sentence summary of the design enhancement applied and optio
     }
 
     // 3. Deterministic Local AST Transformation Engine
-    const localResult = applyLocalAIAssistantCommand(element, prompt);
+    const localResult = applyLocalAIAssistantCommand(element, prompt, lang);
     res.json({
       updated: localResult.updated,
       summary: localResult.summary,
+      requiresImageSelection: localResult.requiresImageSelection,
       provider: 'local-engine',
       deepseekConfigured: false,
     });
@@ -267,7 +284,11 @@ async function startServer() {
   } else {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);

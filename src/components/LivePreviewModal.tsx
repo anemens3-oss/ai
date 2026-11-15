@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import {
   ArrowLeft,
   Check,
-  Code2,
   Copy,
   Download,
-  ExternalLink,
   Maximize2,
   Minimize2,
   Monitor,
@@ -18,6 +16,7 @@ import {
   GeneratedWebsiteBundle,
   ViewportMode,
 } from '../types/design';
+import { useI18n, LanguageSwitcher } from '../i18n/I18nContext';
 
 interface LivePreviewModalProps {
   project: DesignProject;
@@ -33,9 +32,10 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
   bundle,
   isGenerating = false,
   onClose,
-  onRegenerate,
   onExportZip,
 }) => {
+  const { t } = useI18n();
+
   const [viewport, setViewport] = useState<ViewportMode>('desktop');
   const [activeTab, setActiveTab] = useState<'preview' | 'html' | 'css' | 'js' | 'react'>('preview');
   const [iframeKey, setIframeKey] = useState(1);
@@ -79,7 +79,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
             className="px-3 py-1.5 text-xs font-semibold text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Editor</span>
+            <span>{t.preview.backToEditor}</span>
           </button>
 
           <div className="hidden sm:flex items-center gap-2 text-xs">
@@ -103,7 +103,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
                 }`}
               >
                 <Monitor className="w-3.5 h-3.5" />
-                <span>Desktop</span>
+                <span>{t.preview.desktop}</span>
               </button>
               <button
                 type="button"
@@ -115,7 +115,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
                 }`}
               >
                 <Tablet className="w-3.5 h-3.5" />
-                <span>Tablet (768px)</span>
+                <span>{t.preview.tablet}</span>
               </button>
               <button
                 type="button"
@@ -127,7 +127,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
-                <span>Mobile (390px)</span>
+                <span>{t.preview.mobile}</span>
               </button>
             </div>
           )}
@@ -135,7 +135,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
           <div className="flex items-center gap-1 bg-[#09090B] p-1 rounded-lg border border-zinc-800">
             {(
               [
-                { id: 'preview', label: 'Live Preview' },
+                { id: 'preview', label: t.preview.livePreviewTab },
                 { id: 'html', label: 'HTML5' },
                 { id: 'css', label: 'CSS3' },
                 { id: 'js', label: 'JS' },
@@ -158,24 +158,25 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
           </div>
         </div>
 
-        {/* Right Actions: Reload, Fullscreen, Export ZIP */}
+        {/* Right Actions: Language, Reload, Fullscreen, Export ZIP */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <button
             type="button"
-            aria-label="Reload Preview"
+            aria-label={t.preview.reload}
             onClick={() => setIframeKey((k) => k + 1)}
             className="p-2 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-            title="Reload Preview"
+            title={t.preview.reload}
           >
             <RefreshCw className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
           </button>
 
           <button
             type="button"
-            aria-label="Toggle Fullscreen Preview"
+            aria-label={t.preview.fullscreen}
             onClick={() => setIsFullscreen((f) => !f)}
             className="p-2 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-            title="Toggle Fullscreen"
+            title={t.preview.fullscreen}
           >
             {isFullscreen ? (
               <Minimize2 className="w-4 h-4" />
@@ -190,7 +191,7 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
             className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download ZIP</span>
+            <span>{t.preview.downloadZip}</span>
           </button>
         </div>
       </header>
@@ -202,11 +203,16 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
             style={{ width: viewportWidthMap[viewport] }}
             className="h-full bg-[#0D0D12] border border-zinc-800 rounded-xl overflow-hidden shadow-2xl transition-all duration-200 flex flex-col"
           >
-            {/* Simulated Browser Address Bar */}
             <div className="px-4 py-2 bg-[#14141A] border-b border-zinc-800 flex items-center justify-between text-xs text-zinc-400 font-mono">
-              <span>https://{project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.sitecraft.app</span>
+              <span>
+                https://{project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.sitecraft.app
+              </span>
               <span className="tabular-nums">
-                {viewport === 'desktop' ? '1440px' : viewport === 'tablet' ? '768px' : '390px'}
+                {viewport === 'desktop'
+                  ? '1440px'
+                  : viewport === 'tablet'
+                  ? '768px'
+                  : '390px'}
               </span>
             </div>
 
@@ -232,8 +238,12 @@ export const LivePreviewModal: React.FC<LivePreviewModalProps> = ({
                 onClick={handleCopyCode}
                 className="px-3 py-1 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 rounded flex items-center gap-1.5 cursor-pointer"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy Code'}</span>
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+                <span>{copied ? t.preview.copied : t.preview.copyCode}</span>
               </button>
             </div>
             <pre className="flex-1 p-5 text-xs font-mono text-zinc-200 overflow-auto leading-relaxed">

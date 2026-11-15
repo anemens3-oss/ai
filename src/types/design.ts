@@ -8,6 +8,7 @@ export type ElementType =
   | 'rectangle';
 
 export type ViewportMode = 'desktop' | 'tablet' | 'mobile';
+export type Language = 'ru' | 'en';
 
 export interface ElementPosition {
   x: number;
@@ -59,7 +60,12 @@ export interface ElementAssets {
   src?: string;
   alt?: string;
   href?: string;
-  objectFit?: 'cover' | 'contain';
+  objectFit?: 'cover' | 'contain' | 'fill';
+  aspectRatio?: 'auto' | '16:9' | '4:3' | '1:1';
+  cropZoom?: number;
+  cropX?: number;
+  cropY?: number;
+  assetId?: string;
 }
 
 export interface ResponsiveOverride {
@@ -78,7 +84,19 @@ export interface ElementMetadata {
   content: string;
   locked?: boolean;
   hidden?: boolean;
-  semanticTag?: 'header' | 'section' | 'div' | 'nav' | 'footer' | 'article' | 'main' | 'h1' | 'h2' | 'h3' | 'p' | 'button';
+  semanticTag?:
+    | 'header'
+    | 'section'
+    | 'div'
+    | 'nav'
+    | 'footer'
+    | 'article'
+    | 'main'
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'p'
+    | 'button';
   animation?: 'none' | 'fade-up' | 'scale-in' | 'glow-hover';
   componentSourceId?: string;
 }
@@ -117,6 +135,7 @@ export interface AIChangeRecord {
   status: 'pending' | 'accepted' | 'rejected';
   before: DesignElement;
   after: DesignElement;
+  requiresImageSelection?: boolean;
 }
 
 export interface GeneratedWebsiteBundle {
@@ -153,4 +172,19 @@ export interface TemplateDefinition {
   previewImage: string;
   accentColor: string;
   pages: DesignPage[];
+  isCustom?: boolean;
+}
+
+export interface AssetItem {
+  id: string;
+  name: string;
+  src: string;
+  mimeType: string;
+  format: string;
+  sizeBytes: number;
+  width?: number;
+  height?: number;
+  category: string;
+  createdAt: string;
+  isBuiltIn?: boolean;
 }

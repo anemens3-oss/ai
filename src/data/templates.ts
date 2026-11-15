@@ -1,4 +1,5 @@
 import {
+  AssetItem,
   DesignElement,
   DesignPage,
   DesignProject,
@@ -6,36 +7,71 @@ import {
 } from '../types/design';
 import { createDefaultElement, generateId } from '../utils/designEngine';
 
-export const STUDIO_ASSETS = [
+export const STUDIO_ASSETS: AssetItem[] = [
   {
     id: 'asset_business',
     name: 'Corporate Glass HQ',
     category: 'Architecture',
     src: '/src/assets/images/template_modern_business_1794725846334.jpg',
+    mimeType: 'image/jpeg',
+    format: 'JPG',
+    sizeBytes: 342800,
+    width: 1280,
+    height: 720,
+    createdAt: '2026-11-14T10:00:00.000Z',
+    isBuiltIn: true,
   },
   {
     id: 'asset_portfolio',
     name: 'Sculptural Design Studio',
     category: 'Editorial',
     src: '/src/assets/images/template_creative_portfolio_1794725847084.jpg',
+    mimeType: 'image/jpeg',
+    format: 'JPG',
+    sizeBytes: 318400,
+    width: 1280,
+    height: 720,
+    createdAt: '2026-11-14T10:05:00.000Z',
+    isBuiltIn: true,
   },
   {
     id: 'asset_restaurant',
     name: 'Artisanal Michelin Plating',
     category: 'Gastronomy',
     src: '/src/assets/images/template_restaurant_dining_1794725848428.jpg',
+    mimeType: 'image/jpeg',
+    format: 'JPG',
+    sizeBytes: 294120,
+    width: 1280,
+    height: 720,
+    createdAt: '2026-11-14T10:10:00.000Z',
+    isBuiltIn: true,
   },
   {
     id: 'asset_auto',
     name: 'Performance Engineering Bay',
     category: 'Automotive',
     src: '/src/assets/images/template_auto_service_1794725849460.jpg',
+    mimeType: 'image/jpeg',
+    format: 'JPG',
+    sizeBytes: 365900,
+    width: 1280,
+    height: 720,
+    createdAt: '2026-11-14T10:15:00.000Z',
+    isBuiltIn: true,
   },
   {
     id: 'asset_ecommerce',
     name: 'Titanium Chronograph & Audio',
     category: 'Luxury Retail',
     src: '/src/assets/images/template_ecommerce_luxury_1794725850156.jpg',
+    mimeType: 'image/jpeg',
+    format: 'JPG',
+    sizeBytes: 312600,
+    width: 1280,
+    height: 720,
+    createdAt: '2026-11-14T10:20:00.000Z',
+    isBuiltIn: true,
   },
 ];
 
@@ -98,7 +134,10 @@ function makeModernBusinessPages(): DesignPage[] {
         paddingLeft: 24,
         paddingRight: 24,
       },
-      metadata: { content: 'APEX GLOBAL ADVISORY   ·   Strategy   ·   M&A   ·   Capital Markets', semanticTag: 'header' },
+      metadata: {
+        content: 'APEX GLOBAL ADVISORY   ·   Strategy   ·   M&A   ·   Capital Markets',
+        semanticTag: 'header',
+      },
       typography: {
         fontFamily: 'Plus Jakarta Sans',
         fontSize: 15,
@@ -215,7 +254,8 @@ function makeModernBusinessPages(): DesignPage[] {
         textAlign: 'left',
       },
       metadata: {
-        content: '$14.8B Advisory Volume — 42 cross-border institutional restructurings completed since 2023.',
+        content:
+          '$14.8B Advisory Volume — 42 cross-border institutional restructurings completed since 2023.',
       },
     }),
     createDefaultElement('container', rootId, {
@@ -240,7 +280,8 @@ function makeModernBusinessPages(): DesignPage[] {
         textAlign: 'left',
       },
       metadata: {
-        content: '98.4% Client Retention — Dedicated senior partner teams across 6 global financial hubs.',
+        content:
+          '98.4% Client Retention — Dedicated senior partner teams across 6 global financial hubs.',
       },
     }),
     createDefaultElement('container', rootId, {
@@ -265,14 +306,13 @@ function makeModernBusinessPages(): DesignPage[] {
         textAlign: 'left',
       },
       metadata: {
-        content: 'ISO 27001 Sovereign Data — End-to-end encrypted diligence rooms and regulatory compliance.',
+        content:
+          'ISO 27001 Sovereign Data — End-to-end encrypted diligence rooms and regulatory compliance.',
       },
     }),
   ];
 
-  return [
-    buildPageFromElements('page_mb_home', 'Home', 'home', '#090D16', 780, items),
-  ];
+  return [buildPageFromElements('page_mb_home', 'Home', 'home', '#090D16', 780, items)];
 }
 
 function makeCreativePortfolioPages(): DesignPage[] {
@@ -292,7 +332,9 @@ function makeCreativePortfolioPages(): DesignPage[] {
         letterSpacing: '0.08em',
         textAlign: 'left',
       },
-      metadata: { content: 'ATELIER KRONOS — INDUSTRIAL & ARCHITECTURAL MONOLITHS (ZURICH / MILAN)' },
+      metadata: {
+        content: 'ATELIER KRONOS — INDUSTRIAL & ARCHITECTURAL MONOLITHS (ZURICH / MILAN)',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'cp_title',
@@ -407,21 +449,24 @@ function makeSaaSLandingPages(): DesignPage[] {
         paddingTop: 16,
         paddingLeft: 24,
       },
-      metadata: { content: 'VECTRA CLOUD   ·   Edge Compute   ·   Zero-Trust Mesh   ·   Observability   ·   Pricing' },
+      metadata: {
+        content:
+          'VECTRA CLOUD   ·   Edge Compute   ·   Zero-Trust Mesh   ·   Observability   ·   Pricing',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'saas_headline',
       name: 'Hero Display Headline',
-      position: { x: 140, y: 120 },
-      dimensions: { width: 920, height: 120 },
+      position: { x: 48, y: 116 },
+      dimensions: { width: 540, height: 140 },
       styles: { ...createDefaultElement('text', rootId).styles, color: '#FFFFFF' },
       typography: {
         fontFamily: 'Plus Jakarta Sans',
-        fontSize: 48,
+        fontSize: 44,
         fontWeight: '800',
         lineHeight: 1.1,
         letterSpacing: '-0.03em',
-        textAlign: 'center',
+        textAlign: 'left',
       },
       metadata: {
         content: 'Deploy distributed workloads in 40 milliseconds.',
@@ -431,16 +476,16 @@ function makeSaaSLandingPages(): DesignPage[] {
     createDefaultElement('text', rootId, {
       id: 'saas_subheadline',
       name: 'Hero Subtitle',
-      position: { x: 240, y: 248 },
-      dimensions: { width: 720, height: 64 },
+      position: { x: 48, y: 268 },
+      dimensions: { width: 510, height: 84 },
       styles: { ...createDefaultElement('text', rootId).styles, color: '#A1A1AA' },
       typography: {
         fontFamily: 'DM Sans',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '400',
         lineHeight: 1.55,
         letterSpacing: '0em',
-        textAlign: 'center',
+        textAlign: 'left',
       },
       metadata: {
         content:
@@ -450,8 +495,8 @@ function makeSaaSLandingPages(): DesignPage[] {
     createDefaultElement('button', rootId, {
       id: 'saas_cta_start',
       name: 'Start Free Cluster CTA',
-      position: { x: 480, y: 332 },
-      dimensions: { width: 240, height: 52 },
+      position: { x: 48, y: 374 },
+      dimensions: { width: 230, height: 52 },
       styles: {
         ...createDefaultElement('button', rootId).styles,
         background: '#2563EB',
@@ -460,22 +505,39 @@ function makeSaaSLandingPages(): DesignPage[] {
       },
       metadata: { content: 'Provision Free Cluster' },
     }),
+    createDefaultElement('image', rootId, {
+      id: 'saas_hero_image',
+      name: 'Cloud Infrastructure Visual',
+      position: { x: 616, y: 112 },
+      dimensions: { width: 544, height: 356 },
+      styles: {
+        ...createDefaultElement('image', rootId).styles,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#27273A',
+      },
+      assets: {
+        src: '/src/assets/images/template_modern_business_1794725846334.jpg',
+        alt: 'Enterprise Cloud Operations Center',
+        objectFit: 'cover',
+      },
+    }),
     createDefaultElement('container', rootId, {
       id: 'saas_bento_1',
       name: 'Feature Card — Global Mesh',
-      position: { x: 40, y: 424 },
-      dimensions: { width: 544, height: 280 },
+      position: { x: 40, y: 500 },
+      dimensions: { width: 544, height: 220 },
       styles: {
         ...createDefaultElement('container', rootId).styles,
         background: '#13131C',
         borderColor: '#27273A',
         borderRadius: 16,
-        paddingTop: 32,
-        paddingLeft: 32,
+        paddingTop: 28,
+        paddingLeft: 28,
       },
       typography: {
         fontFamily: 'Plus Jakarta Sans',
-        fontSize: 20,
+        fontSize: 19,
         fontWeight: '700',
         lineHeight: 1.4,
         letterSpacing: '-0.015em',
@@ -489,19 +551,19 @@ function makeSaaSLandingPages(): DesignPage[] {
     createDefaultElement('container', rootId, {
       id: 'saas_bento_2',
       name: 'Feature Card — Live Telemetry',
-      position: { x: 616, y: 424 },
-      dimensions: { width: 544, height: 280 },
+      position: { x: 616, y: 500 },
+      dimensions: { width: 544, height: 220 },
       styles: {
         ...createDefaultElement('container', rootId).styles,
         background: '#13131C',
         borderColor: '#27273A',
         borderRadius: 16,
-        paddingTop: 32,
-        paddingLeft: 32,
+        paddingTop: 28,
+        paddingLeft: 28,
       },
       typography: {
         fontFamily: 'Plus Jakarta Sans',
-        fontSize: 20,
+        fontSize: 19,
         fontWeight: '700',
         lineHeight: 1.4,
         letterSpacing: '-0.015em',
@@ -536,7 +598,10 @@ function makeRestaurantPages(): DesignPage[] {
         letterSpacing: '0.1em',
         textAlign: 'left',
       },
-      metadata: { content: 'AURELIA GASTRONOMY   ·   AUTUMN TASTING MENU   ·   CELLAR   ·   PRIVATE DINING' },
+      metadata: {
+        content:
+          'AURELIA GASTRONOMY   ·   AUTUMN TASTING MENU   ·   CELLAR   ·   PRIVATE DINING',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'rest_title',
@@ -552,7 +617,10 @@ function makeRestaurantPages(): DesignPage[] {
         letterSpacing: '-0.015em',
         textAlign: 'left',
       },
-      metadata: { content: 'Wood-fired heritage cuisine & rare biodynamic vintages.', semanticTag: 'h1' },
+      metadata: {
+        content: 'Wood-fired heritage cuisine & rare biodynamic vintages.',
+        semanticTag: 'h1',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'rest_desc',
@@ -651,7 +719,10 @@ function makeAutoServicePages(): DesignPage[] {
         paddingTop: 16,
         paddingLeft: 24,
       },
-      metadata: { content: 'STUTTGART TECHNIK   ·   ECU CALIBRATION   ·   CARBON AERO   ·   TRACK PREP   ·   BOOK BAY' },
+      metadata: {
+        content:
+          'STUTTGART TECHNIK   ·   ECU CALIBRATION   ·   CARBON AERO   ·   TRACK PREP   ·   BOOK BAY',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'auto_title',
@@ -667,7 +738,10 @@ function makeAutoServicePages(): DesignPage[] {
         letterSpacing: '-0.01em',
         textAlign: 'left',
       },
-      metadata: { content: 'PRECISION GERMAN MOTORSPORT ENGINEERING & DYNO TUNING.', semanticTag: 'h1' },
+      metadata: {
+        content: 'PRECISION GERMAN MOTORSPORT ENGINEERING & DYNO TUNING.',
+        semanticTag: 'h1',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'auto_sub',
@@ -792,7 +866,9 @@ function makeEcommercePages(): DesignPage[] {
         paddingTop: 16,
         paddingLeft: 24,
       },
-      metadata: { content: 'AURA OBJECTS   ·   CHRONOGRAPHS   ·   PLANAR AUDIO   ·   MATERIALS   ·   BAG (2)' },
+      metadata: {
+        content: 'AURA OBJECTS   ·   CHRONOGRAPHS   ·   PLANAR AUDIO   ·   MATERIALS   ·   BAG (2)',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'ec_title',
@@ -808,7 +884,10 @@ function makeEcommercePages(): DesignPage[] {
         letterSpacing: '-0.025em',
         textAlign: 'left',
       },
-      metadata: { content: 'Grade-5 Titanium & Reference Planar Acoustics.', semanticTag: 'h1' },
+      metadata: {
+        content: 'Grade-5 Titanium & Reference Planar Acoustics.',
+        semanticTag: 'h1',
+      },
     }),
     createDefaultElement('text', rootId, {
       id: 'ec_sub',
@@ -946,7 +1025,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     category: 'Cloud & Developer Platform',
     tagline: 'High-conversion technical product launch',
     description:
-      'Obsidian developer platform template with centered hero proposition, asymmetric Bento capability blocks, and instant CTA.',
+      'Obsidian developer platform template with hero proposition, cloud showcase image, Bento capability blocks, and instant CTA.',
     previewImage: '/src/assets/images/template_modern_business_1794725846334.jpg',
     accentColor: '#2563EB',
     pages: makeSaaSLandingPages(),
@@ -989,12 +1068,12 @@ export const TEMPLATES: TemplateDefinition[] = [
 export const COMPONENT_PRESETS = [
   {
     id: 'comp_navbar',
-    name: 'Glass Navigation Header',
+    name: 'Navbar (Шапка навигации)',
     category: 'Navigation',
-    description: 'Full-width sticky navigation bar with brand lockup and links',
+    description: 'Sticky top navigation bar with brand title and menu links',
     create: (parentId: string) =>
       createDefaultElement('section', parentId, {
-        name: 'Navigation Header',
+        name: 'Navbar Header',
         position: { x: 40, y: 24 },
         dimensions: { width: 1120, height: 64 },
         styles: {
@@ -1004,48 +1083,136 @@ export const COMPONENT_PRESETS = [
           borderRadius: 12,
         },
         metadata: {
-          content: 'BRAND STUDIO   ·   Capabilities   ·   Work   ·   Pricing   ·   Contact',
+          content: 'SITECRAFT STUDIO   ·   Возможности   ·   Проекты   ·   Тарифы   ·   Контакты',
           semanticTag: 'header',
         },
       }),
   },
   {
     id: 'comp_hero_banner',
-    name: 'Hero Value Proposition Block',
+    name: 'Hero Section (Главный экран)',
     category: 'Hero',
-    description: 'High-impact headline container with dark obsidian surface',
+    description: 'High-impact headline banner with call-to-action proposition',
     create: (parentId: string) =>
       createDefaultElement('section', parentId, {
-        name: 'Hero Banner Block',
+        name: 'Hero Section',
         position: { x: 40, y: 110 },
-        dimensions: { width: 640, height: 260 },
+        dimensions: { width: 1120, height: 280 },
         styles: {
           ...createDefaultElement('section', parentId).styles,
           background: '#14141D',
           borderColor: '#2E2E42',
           borderRadius: 16,
-          paddingTop: 32,
-          paddingLeft: 32,
+          paddingTop: 36,
+          paddingLeft: 36,
         },
         typography: {
           fontFamily: 'Plus Jakarta Sans',
-          fontSize: 32,
+          fontSize: 34,
           fontWeight: '800',
           lineHeight: 1.2,
           letterSpacing: '-0.02em',
           textAlign: 'left',
         },
         metadata: {
-          content: 'Design once. Build instantly with deterministic precision.',
+          content: 'Design once. Build instantly — Визуальная разработка нового поколения.',
           semanticTag: 'section',
         },
       }),
   },
   {
+    id: 'comp_features',
+    name: 'Features (Блок преимуществ)',
+    category: 'Features',
+    description: 'Structured feature showcase section with architectural grid',
+    create: (parentId: string) =>
+      createDefaultElement('section', parentId, {
+        name: 'Features Grid Block',
+        position: { x: 40, y: 410 },
+        dimensions: { width: 1120, height: 220 },
+        styles: {
+          ...createDefaultElement('section', parentId).styles,
+          background: '#111116',
+          borderColor: '#27272A',
+          borderRadius: 14,
+          paddingTop: 28,
+          paddingLeft: 32,
+        },
+        typography: {
+          fontFamily: 'Plus Jakarta Sans',
+          fontSize: 20,
+          fontWeight: '700',
+          lineHeight: 1.45,
+          letterSpacing: '-0.01em',
+          textAlign: 'left',
+        },
+        metadata: {
+          content:
+            '01. Интерактивный холст Figma-уровня   ·   02. ИИ-компиляция в HTML/CSS/React   ·   03. Мгновенный экспорт в ZIP',
+          semanticTag: 'section',
+        },
+      }),
+  },
+  {
+    id: 'comp_gallery',
+    name: 'Image Gallery (Галерея фото)',
+    category: 'Media',
+    description: 'Visual photography showcase frame with rounded border',
+    create: (parentId: string) =>
+      createDefaultElement('image', parentId, {
+        name: 'Gallery Showcase Image',
+        position: { x: 80, y: 180 },
+        dimensions: { width: 540, height: 340 },
+        styles: {
+          ...createDefaultElement('image', parentId).styles,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: '#27272A',
+        },
+        assets: {
+          src: '/src/assets/images/template_creative_portfolio_1794725847084.jpg',
+          alt: 'Gallery Visual Showcase',
+          objectFit: 'cover',
+        },
+      }),
+  },
+  {
+    id: 'comp_testimonials',
+    name: 'Testimonials (Отзывы клиентов)',
+    category: 'Social Proof',
+    description: 'Verified customer quote & executive attribution block',
+    create: (parentId: string) =>
+      createDefaultElement('container', parentId, {
+        name: 'Testimonials Block',
+        position: { x: 60, y: 260 },
+        dimensions: { width: 540, height: 190 },
+        styles: {
+          ...createDefaultElement('container', parentId).styles,
+          background: '#14141B',
+          borderColor: '#272736',
+          borderRadius: 14,
+          paddingTop: 24,
+          paddingLeft: 28,
+        },
+        typography: {
+          fontFamily: 'DM Sans',
+          fontSize: 16,
+          fontWeight: '500',
+          lineHeight: 1.55,
+          letterSpacing: '0em',
+          textAlign: 'left',
+        },
+        metadata: {
+          content:
+            '«SITECRAFT сократил цикл запуска наших клиентских лендингов с двух недель до 25 минут» — Алексей Воронцов, CTO NordTech',
+        },
+      }),
+  },
+  {
     id: 'comp_pricing_card',
-    name: 'Enterprise Tier Card',
+    name: 'Pricing (Тарифный план)',
     category: 'Commerce',
-    description: 'Structured pricing & specification card with border highlight',
+    description: 'Structured pricing & specification card with accent border',
     create: (parentId: string) =>
       createDefaultElement('container', parentId, {
         name: 'Pricing Tier Card',
@@ -1069,13 +1236,103 @@ export const COMPONENT_PRESETS = [
           textAlign: 'left',
         },
         metadata: {
-          content: 'PRO STUDIO PLAN — $49/mo · Unlimited visual projects, DeepSeek AI code compilation & full ZIP export.',
+          content:
+            'PRO STUDIO — $49/мес · Безлимитные проекты, загрузка собственных фото, DeepSeek AI и полный экспорт в ZIP.',
+        },
+      }),
+  },
+  {
+    id: 'comp_contact_form',
+    name: 'Contact Form (Форма обратной связи)',
+    category: 'Forms',
+    description: 'Lead capture & consultation request block',
+    create: (parentId: string) =>
+      createDefaultElement('section', parentId, {
+        name: 'Contact Form Section',
+        position: { x: 60, y: 300 },
+        dimensions: { width: 640, height: 220 },
+        styles: {
+          ...createDefaultElement('section', parentId).styles,
+          background: '#12121A',
+          borderColor: '#2E2E3E',
+          borderRadius: 16,
+          paddingTop: 28,
+          paddingLeft: 32,
+        },
+        typography: {
+          fontFamily: 'Plus Jakarta Sans',
+          fontSize: 18,
+          fontWeight: '600',
+          lineHeight: 1.45,
+          letterSpacing: '0em',
+          textAlign: 'left',
+        },
+        metadata: {
+          content:
+            'Связаться с нами — Оставьте ваш Email и описание задачи. Ответим в течение 15 минут: [ name@company.com ] [ Отправить заявку ]',
+          semanticTag: 'section',
+        },
+      }),
+  },
+  {
+    id: 'comp_card',
+    name: 'Card (Карточка контента)',
+    category: 'Containers',
+    description: 'Universal surface card for services, products, or metrics',
+    create: (parentId: string) =>
+      createDefaultElement('container', parentId, {
+        name: 'Content Card',
+        position: { x: 100, y: 240 },
+        dimensions: { width: 340, height: 190 },
+        styles: {
+          ...createDefaultElement('container', parentId).styles,
+          background: '#16161F',
+          borderColor: '#272732',
+          borderRadius: 12,
+          paddingTop: 24,
+          paddingLeft: 24,
+        },
+        metadata: {
+          content: 'Карточка услуги — Отредактируйте заголовок, описание и параметры отображения.',
+        },
+      }),
+  },
+  {
+    id: 'comp_footer',
+    name: 'Footer (Подвал сайта)',
+    category: 'Navigation',
+    description: 'Bottom copyright, links, and contact information bar',
+    create: (parentId: string) =>
+      createDefaultElement('section', parentId, {
+        name: 'Footer Block',
+        position: { x: 40, y: 660 },
+        dimensions: { width: 1120, height: 84 },
+        styles: {
+          ...createDefaultElement('section', parentId).styles,
+          background: '#0B0B0F',
+          borderColor: '#1F1F28',
+          borderRadius: 10,
+          paddingTop: 24,
+          paddingLeft: 28,
+        },
+        typography: {
+          fontFamily: 'DM Sans',
+          fontSize: 14,
+          fontWeight: '500',
+          lineHeight: 1.4,
+          letterSpacing: '0em',
+          textAlign: 'left',
+        },
+        metadata: {
+          content:
+            '© 2026 SITECRAFT Studio · Все права защищены · Политика конфиденциальности · studio@sitecraft.dev',
+          semanticTag: 'footer',
         },
       }),
   },
   {
     id: 'comp_cta_button',
-    name: 'Primary Conversion Button',
+    name: 'Button (Акцентная кнопка)',
     category: 'Actions',
     description: 'High-contrast interactive action button with hover elevation',
     create: (parentId: string) =>
@@ -1090,7 +1347,7 @@ export const COMPONENT_PRESETS = [
           borderRadius: 10,
         },
         metadata: {
-          content: 'Launch Live Website',
+          content: 'Запустить проект',
           semanticTag: 'button',
         },
       }),
@@ -1099,9 +1356,10 @@ export const COMPONENT_PRESETS = [
 
 export function createProjectFromTemplate(
   templateId: string,
-  customName?: string
+  customName?: string,
+  allTemplates: TemplateDefinition[] = TEMPLATES
 ): DesignProject {
-  const tpl = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
+  const tpl = allTemplates.find((t) => t.id === templateId) || TEMPLATES[0];
   const clonedPages: DesignPage[] = structuredClone(tpl.pages);
 
   return {
@@ -1118,7 +1376,7 @@ export function createProjectFromTemplate(
   };
 }
 
-export function createBlankProject(name = 'Untitled Visual Project'): DesignProject {
+export function createBlankProject(name = 'Новый визуальный проект'): DesignProject {
   const rootId = 'page_blank_root';
   const items: DesignElement[] = [
     createDefaultElement('section', rootId, {
@@ -1127,7 +1385,7 @@ export function createBlankProject(name = 'Untitled Visual Project'): DesignProj
       position: { x: 40, y: 24 },
       dimensions: { width: 1120, height: 64 },
       metadata: {
-        content: `${name.toUpperCase()}   ·   Overview   ·   Features   ·   Contact`,
+        content: `${name.toUpperCase()}   ·   О проекте   ·   Возможности   ·   Контакты`,
         semanticTag: 'header',
       },
     }),
@@ -1145,7 +1403,7 @@ export function createBlankProject(name = 'Untitled Visual Project'): DesignProj
         textAlign: 'left',
       },
       metadata: {
-        content: 'Start designing visually on the canvas.',
+        content: 'Начните визуальную разработку на холсте.',
         semanticTag: 'h1',
       },
     }),
@@ -1153,20 +1411,20 @@ export function createBlankProject(name = 'Untitled Visual Project'): DesignProj
       id: 'blank_cta',
       name: 'Primary Button',
       position: { x: 48, y: 276 },
-      dimensions: { width: 196, height: 48 },
+      dimensions: { width: 210, height: 48 },
       metadata: {
-        content: 'Explore Capabilities',
+        content: 'Запустить сайт',
         semanticTag: 'button',
       },
     }),
   ];
 
-  const page = buildPageFromElements('page_blank_home', 'Home', 'home', '#09090B', 760, items);
+  const page = buildPageFromElements('page_blank_home', 'Главная', 'home', '#09090B', 760, items);
 
   return {
     id: generateId('proj'),
     name,
-    description: 'Custom visual web project created from scratch in SITECRAFT Studio.',
+    description: 'Пользовательский проект, созданный с чистого листа в SITECRAFT Studio.',
     templateId: 'blank',
     category: 'Custom Project',
     createdAt: new Date().toISOString(),

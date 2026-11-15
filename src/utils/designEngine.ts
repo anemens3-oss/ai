@@ -4,6 +4,7 @@ import {
   DesignProject,
   ElementType,
   GeneratedWebsiteBundle,
+  Language,
   ViewportMode,
 } from '../types/design';
 
@@ -189,6 +190,10 @@ export function createDefaultElement(
           : undefined,
       alt: type === 'image' ? 'Visual showcase' : undefined,
       objectFit: 'cover',
+      aspectRatio: 'auto',
+      cropZoom: 1,
+      cropX: 50,
+      cropY: 50,
     },
     responsive: {},
     metadata: {
@@ -226,24 +231,26 @@ export function resolveElementForViewport(
 ): DesignElement {
   if (viewport === 'desktop') return element;
   const override = element.responsive[viewport];
+  const isRoot = element.parentId === null;
+
+  if (isRoot) {
+    return {
+      ...element,
+      dimensions: {
+        ...element.dimensions,
+        width: viewport === 'tablet' ? 768 : 390,
+        ...(override?.dimensions || {}),
+      },
+    };
+  }
+
   if (!override) {
-    // Intelligent automatic responsive scaling if no explicit override set
-    const scale = viewport === 'tablet' ? 0.68 : 0.34;
-    const maxW = viewport === 'tablet' ? 720 : 350;
-    const isRoot = element.parentId === null;
-    if (isRoot) {
-      return {
-        ...element,
-        dimensions: {
-          ...element.dimensions,
-          width: viewport === 'tablet' ? 768 : 390,
-        },
-      };
-    }
+    const scale = viewport === 'tablet' ? 0.64 : 0.32;
+    const maxW = viewport === 'tablet' ? 700 : 342;
     return {
       ...element,
       position: {
-        x: Math.min(Math.round(element.position.x * scale), viewport === 'tablet' ? 60 : 20),
+        x: Math.min(Math.round(element.position.x * scale), viewport === 'tablet' ? 48 : 24),
         y: element.position.y,
       },
       dimensions: {
@@ -253,7 +260,7 @@ export function resolveElementForViewport(
       typography: {
         ...element.typography,
         fontSize:
-          element.typography.fontSize > 28
+          element.typography.fontSize > 26
             ? Math.round(element.typography.fontSize * (viewport === 'tablet' ? 0.82 : 0.68))
             : element.typography.fontSize,
       },
@@ -314,7 +321,7 @@ export function updateElementInPage(
 }
 
 export function deleteElementFromPage(page: DesignPage, elementId: string): DesignPage {
-  if (elementId === page.rootId) return page; // Never delete root frame
+  if (elementId === page.rootId) return page;
   const target = page.elements[elementId];
   if (!target) return page;
 
@@ -501,19 +508,53 @@ export function groupElementsInPage(
   };
 }
 
+export function isImageReplaceCommand(prompt: string): boolean {
+  const lower = prompt.toLowerCase();
+  return (
+    lower.includes('replace this image') ||
+    lower.includes('change image') ||
+    lower.includes('replace image') ||
+    lower.includes('swap image') ||
+    lower.includes('заменить это изображение') ||
+    lower.includes('замени изображение') ||
+    lower.includes('заменить изображение') ||
+    lower.includes('поменять картинку') ||
+    lower.includes('сменить фото')
+  );
+}
+
 /**
- * Deterministic Local AI Assistant Element Transformer
- * Applies structured design transformations to a selected element when given natural language commands.
+ * Deterministic Local AI Assistant Element Transformer (Supports both Russian and English instructions)
  */
 export function applyLocalAIAssistantCommand(
   element: DesignElement,
-  prompt: string
-): { updated: DesignElement; summary: string } {
+  prompt: string,
+  lang: Language = 'en'
+): { updated: DesignElement; summary: string; requiresImageSelection?: boolean } {
   const lower = prompt.toLowerCase();
   const next = structuredClone(element);
   const changes: string[] = [];
 
-  if (lower.includes('modern') || lower.includes('redesign') || lower.includes('upgrade')) {
+  if (isImageReplaceCommand(lower)) {
+    // Do not invent a fake local file! Prompt user to select from Assets Library, upload, or paste URL.
+    return {
+      updated: next,
+      summary:
+        lang === 'ru'
+          ? 'Готово к замене изображения с сохранением всех настроек и размеров элемента. Выберите файл из библиотеки, загрузите с устройства или вставьте URL.'
+          : 'Ready to replace image while preserving all layout & style properties. Choose an image from your Assets Library, upload a file, or enter a URL.',
+      requiresImageSelection: true,
+    };
+  }
+
+  if (
+    lower.includes('modern') ||
+    lower.includes('redesign') ||
+    lower.includes('upgrade') ||
+    lower.includes('современ') ||
+    lower.includes('обнови') ||
+    lower.includes('редизайн')
+  ) {
     next.styles.borderRadius = Math.max(16, next.styles.borderRadius);
     next.styles.borderWidth = 1;
     next.styles.borderColor = '#38BDF8';
@@ -526,41 +567,77 @@ export function applyLocalAIAssistantCommand(
           : '#111827';
     }
     next.typography.letterSpacing = '-0.02em';
-    changes.push('applied modern architectural surface radius (16px), subtle sky-blue hairline border, and elevated shadow depth');
+    changes.push(
+      'applied modern architectural surface radius (16px), subtle sky-blue hairline border, and elevated shadow depth'
+    );
   }
 
-  if (lower.includes('dark') || lower.includes('obsidian') || lower.includes('graphite')) {
+  if (
+    lower.includes('dark') ||
+    lower.includes('obsidian') ||
+    lower.includes('graphite') ||
+    lower.includes('тёмн') ||
+    lower.includes('темн')
+  ) {
     next.styles.background = '#09090B';
     next.styles.color = '#F8FAFC';
     next.styles.borderWidth = 1;
     next.styles.borderColor = '#27272A';
     next.styles.borderStyle = 'solid';
-    changes.push('switched surface palette to deep obsidian (#09090B) with high-contrast #F8FAFC typography');
+    changes.push(
+      'switched surface palette to deep obsidian (#09090B) with high-contrast #F8FAFC typography'
+    );
   }
 
-  if (lower.includes('light') || lower.includes('bright') || lower.includes('white')) {
+  if (
+    lower.includes('light') ||
+    lower.includes('bright') ||
+    lower.includes('white') ||
+    lower.includes('светл') ||
+    lower.includes('бел')
+  ) {
     next.styles.background = '#F8FAFC';
     next.styles.color = '#0F172A';
     next.styles.borderColor = '#E2E8F0';
     changes.push('converted surface to crisp light theme (#F8FAFC) with dark slate text (#0F172A)');
   }
 
-  if (lower.includes('animation') || lower.includes('smooth') || lower.includes('motion')) {
+  if (
+    lower.includes('animation') ||
+    lower.includes('smooth') ||
+    lower.includes('motion') ||
+    lower.includes('анимац') ||
+    lower.includes('плавн')
+  ) {
     next.metadata.animation = 'fade-up';
     next.styles.shadow = 'lg';
     changes.push('enabled smooth cubic-bezier entrance & hover elevation transition');
   }
 
-  if (lower.includes('spacing') || lower.includes('padding') || lower.includes('breathing')) {
+  if (
+    lower.includes('spacing') ||
+    lower.includes('padding') ||
+    lower.includes('breathing') ||
+    lower.includes('отступ') ||
+    lower.includes('воздух')
+  ) {
     next.styles.paddingTop = Math.max(32, next.styles.paddingTop + 16);
     next.styles.paddingBottom = Math.max(32, next.styles.paddingBottom + 16);
     next.styles.paddingLeft = Math.max(32, next.styles.paddingLeft + 16);
     next.styles.paddingRight = Math.max(32, next.styles.paddingRight + 16);
     next.styles.gap = Math.max(24, next.styles.gap + 8);
-    changes.push(`expanded internal padding to ${next.styles.paddingTop}px and layout gap to ${next.styles.gap}px`);
+    changes.push(
+      `expanded internal padding to ${next.styles.paddingTop}px and layout gap to ${next.styles.gap}px`
+    );
   }
 
-  if (lower.includes('responsive') || lower.includes('mobile') || lower.includes('tablet')) {
+  if (
+    lower.includes('responsive') ||
+    lower.includes('mobile') ||
+    lower.includes('tablet') ||
+    lower.includes('адаптив') ||
+    lower.includes('мобил')
+  ) {
     next.responsive = {
       tablet: {
         dimensions: {
@@ -586,10 +663,18 @@ export function applyLocalAIAssistantCommand(
         },
       },
     };
-    changes.push('generated explicit Tablet (768px) and Mobile (390px) responsive breakpoint overrides');
+    changes.push(
+      'generated explicit Tablet (768px) and Mobile (390px) responsive breakpoint overrides'
+    );
   }
 
-  if (lower.includes('typography') || lower.includes('font') || lower.includes('headline')) {
+  if (
+    lower.includes('typography') ||
+    lower.includes('font') ||
+    lower.includes('headline') ||
+    lower.includes('типограф') ||
+    lower.includes('шрифт')
+  ) {
     next.typography.fontFamily = 'Plus Jakarta Sans';
     next.typography.fontWeight = '700';
     next.typography.lineHeight = 1.2;
@@ -597,17 +682,20 @@ export function applyLocalAIAssistantCommand(
     if (next.type === 'text') {
       next.typography.fontSize = Math.min(64, Math.round(next.typography.fontSize * 1.15));
     }
-    changes.push(`refined typography to Plus Jakarta Sans Bold (${next.typography.fontSize}px, tight tracking)`);
+    changes.push(
+      `refined typography to Plus Jakarta Sans Bold (${next.typography.fontSize}px, tight tracking)`
+    );
   }
 
   if (changes.length === 0) {
-    // Default intelligent refinement if custom prompt didn't hit a keyword
     next.styles.borderRadius = Math.max(12, next.styles.borderRadius + 4);
     next.styles.shadow = 'lg';
     next.styles.borderWidth = 1;
     next.styles.borderColor = '#3B82F6';
     next.styles.borderStyle = 'solid';
-    changes.push(`refined "${element.name}" with accent border highlight, 12px+ corner radius, and balanced elevation`);
+    changes.push(
+      `refined "${element.name}" with accent border highlight, 12px+ corner radius, and balanced elevation`
+    );
   }
 
   return {
@@ -618,7 +706,6 @@ export function applyLocalAIAssistantCommand(
 
 /**
  * Deterministic Design-to-Code Compiler
- * Compiles a structured DesignProject JSON into semantic HTML5, responsive CSS3, interactive JS, and React JSX.
  */
 export function compileProjectToCode(
   project: DesignProject,
@@ -631,6 +718,9 @@ export function compileProjectToCode(
   const root = activePage.elements[activePage.rootId];
 
   const cssRules: string[] = [];
+  const tabletRules: string[] = [];
+  const mobileRules: string[] = [];
+
   const shadowMap: Record<string, string> = {
     none: 'none',
     sm: '0 2px 6px rgba(0,0,0,0.22)',
@@ -728,10 +818,11 @@ body {
   left: ${el.position.x}px;
   top: ${el.position.y}px;
   width: ${el.dimensions.width}px;
-  height: ${el.dimensions.height}px;
+  ${el.type === 'image' ? `height: ${el.dimensions.height}px;` : `min-height: ${el.dimensions.height}px;`}
   background: ${el.styles.background};
   color: ${el.styles.color};
   padding: ${el.styles.paddingTop}px ${el.styles.paddingRight}px ${el.styles.paddingBottom}px ${el.styles.paddingLeft}px;
+  margin: ${el.styles.marginTop}px ${el.styles.marginRight}px ${el.styles.marginBottom}px ${el.styles.marginLeft}px;
   border: ${el.styles.borderWidth}px ${el.styles.borderStyle} ${el.styles.borderColor};
   border-radius: ${el.styles.borderRadius}px;
   box-shadow: ${shadowMap[el.styles.shadow] || 'none'};
@@ -748,8 +839,28 @@ body {
   letter-spacing: ${el.typography.letterSpacing};
   text-align: ${el.typography.textAlign};
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-  overflow: hidden;
+  overflow: ${el.type === 'image' ? 'hidden' : 'visible'};
 }`);
+
+      if (el.responsive.tablet) {
+        const t = el.responsive.tablet;
+        tabletRules.push(`  .${className} {
+    ${t.dimensions?.width ? `width: ${t.dimensions.width}px !important;` : ''}
+    ${t.dimensions?.height ? `height: ${t.dimensions.height}px !important;` : ''}
+    ${t.typography?.fontSize ? `font-size: ${t.typography.fontSize}px !important;` : ''}
+    ${t.styles?.background ? `background: ${t.styles.background} !important;` : ''}
+  }`);
+      }
+
+      if (el.responsive.mobile) {
+        const m = el.responsive.mobile;
+        mobileRules.push(`  .${className} {
+    ${m.dimensions?.width ? `width: ${m.dimensions.width}px !important;` : ''}
+    ${m.dimensions?.height ? `height: ${m.dimensions.height}px !important;` : ''}
+    ${m.typography?.fontSize ? `font-size: ${m.typography.fontSize}px !important;` : ''}
+    ${m.styles?.background ? `background: ${m.styles.background} !important;` : ''}
+  }`);
+      }
 
       if (el.type === 'button') {
         cssRules.push(`.${className}:hover {
@@ -763,8 +874,13 @@ body {
     if (el.type === 'image') {
       const imgSrc =
         el.assets.src || '/src/assets/images/template_modern_business_1794725846334.jpg';
+      const zoom = el.assets.cropZoom || 1;
+      const cx = el.assets.cropX ?? 50;
+      const cy = el.assets.cropY ?? 50;
+      const objFit = el.assets.objectFit || 'cover';
+
       return `${pad}<div class="${className}${animClass}" data-element-id="${el.id}">
-${pad}  <img src="${imgSrc}" alt="${(el.assets.alt || el.name).replace(/"/g, '&quot;')}" style="width:100%;height:100%;object-fit:${el.assets.objectFit || 'cover'};display:block;" referrerpolicy="no-referrer" />
+${pad}  <img src="${imgSrc}" alt="${(el.assets.alt || el.name).replace(/"/g, '&quot;')}" style="width:100%;height:100%;object-fit:${objFit};object-position:${cx}% ${cy}%;transform:scale(${zoom});display:block;" referrerpolicy="no-referrer" />
 ${pad}</div>`;
     }
 
@@ -795,7 +911,17 @@ ${inner}
 ${pad}</${tag}>`;
   };
 
-  // Responsive media queries for Tablet and Mobile
+  const pagesHTML = project.pages
+    .map((p, idx) => {
+      const markup = buildElementHTML(p, p.rootId, 2);
+      if (idx === 0) return markup;
+      return markup.replace(
+        'class="sc-page-wrapper"',
+        'class="sc-page-wrapper" style="display:none;"'
+      );
+    })
+    .join('\n\n');
+
   cssRules.push(`
 @media (max-width: 1024px) {
   .sc-page-wrapper {
@@ -815,6 +941,7 @@ ${pad}</${tag}>`;
     height: auto !important;
     min-height: 60px;
   }
+${tabletRules.join('\n')}
 }
 
 @media (max-width: 640px) {
@@ -827,6 +954,7 @@ ${pad}</${tag}>`;
     flex-direction: column;
     gap: 8px;
   }
+${mobileRules.join('\n')}
 }
 `);
 
@@ -844,17 +972,6 @@ ${project.pages
     </div>
   </nav>\n`
       : '';
-
-  const pagesHTML = project.pages
-    .map((p, idx) => {
-      const markup = buildElementHTML(p, p.rootId, 2);
-      if (idx === 0) return markup;
-      return markup.replace(
-        'class="sc-page-wrapper"',
-        'class="sc-page-wrapper" style="display:none;"'
-      );
-    })
-    .join('\n\n');
 
   const cssContent = cssRules.join('\n\n');
 
@@ -878,7 +995,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Wire interactive buttons for smooth feedback
   document.querySelectorAll('button[data-element-id]').forEach((button) => {
     button.addEventListener('click', () => {
       button.style.transform = 'scale(0.97)';

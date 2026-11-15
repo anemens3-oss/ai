@@ -5,18 +5,17 @@ import {
   Download,
   Edit3,
   Eye,
-  FilePlus,
   FolderOpen,
-  LayoutGrid,
   Plus,
   Search,
   Trash2,
 } from 'lucide-react';
-import { DesignProject } from '../types/design';
-import { TEMPLATES } from '../data/templates';
+import { DesignProject, TemplateDefinition } from '../types/design';
+import { useI18n, LanguageSwitcher } from '../i18n/I18nContext';
 
 interface DashboardProps {
   projects: DesignProject[];
+  templates: TemplateDefinition[];
   activeEngineLabel: string;
   onBackToLanding: () => void;
   onOpenProject: (projectId: string) => void;
@@ -25,12 +24,14 @@ interface DashboardProps {
   onRenameProject: (projectId: string, newName: string) => void;
   onDuplicateProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
+  onDeleteCustomTemplate: (templateId: string) => void;
   onPreviewProject: (project: DesignProject) => void;
   onExportProjectZip: (project: DesignProject) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   projects,
+  templates,
   activeEngineLabel,
   onBackToLanding,
   onOpenProject,
@@ -39,9 +40,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onRenameProject,
   onDuplicateProject,
   onDeleteProject,
+  onDeleteCustomTemplate,
   onPreviewProject,
   onExportProjectZip,
 }) => {
+  const { t } = useI18n();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -72,7 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleCreateBlankSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const title = newBlankName.trim() || 'Untitled SITECRAFT Site';
+    const title = newBlankName.trim() || 'SITECRAFT Project';
     onCreateBlank(title);
     setNewBlankName('');
     setShowNewModal(false);
@@ -80,7 +84,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="min-h-screen bg-[#09090B] text-[#F4F4F6] flex flex-col">
-      {/* Top Bar Contract */}
+      {/* Top Bar */}
       <header className="flex items-center justify-between gap-8 px-6 lg:px-10 py-4 bg-[#0D0D11] border-b border-zinc-800/90">
         <div className="flex items-center gap-4">
           <button
@@ -89,28 +93,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{t.nav.backHome}</span>
           </button>
           <span className="text-zinc-700">/</span>
           <span className="text-base font-extrabold tracking-tight text-white font-display whitespace-nowrap">
-            SITECRAFT Workspace
+            {t.dashboard.workspaceTitle}
           </span>
         </div>
 
         <div className="hidden md:flex items-center gap-2 text-xs text-zinc-400">
-          <span>Local Storage & IndexedDB Active</span>
+          <span>{t.dashboard.storageStatus}</span>
           <span aria-hidden="true">·</span>
           <span>{activeEngineLabel}</span>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
+          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setShowNewModal(true)}
             className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>New Blank Project</span>
+            <span>{t.dashboard.newBlankBtn}</span>
           </button>
         </div>
       </header>
@@ -123,13 +128,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="p-6 bg-[#121218] border border-blue-500/40 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-end gap-4"
           >
             <div className="flex-1">
-              <label htmlFor="blank-project-name" className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                New Blank Project Name
+              <label
+                htmlFor="blank-project-name"
+                className="block text-xs font-semibold text-zinc-300 mb-1.5"
+              >
+                {t.dashboard.newBlankLabel}
               </label>
               <input
                 id="blank-project-name"
                 type="text"
-                placeholder="e.g., Horizon Robotics Launch Site"
+                placeholder={t.dashboard.newBlankPlaceholder}
                 value={newBlankName}
                 onChange={(e) => setNewBlankName(e.target.value)}
                 autoFocus
@@ -141,14 +149,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 type="submit"
                 className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
               >
-                Create & Open Editor
+                {t.dashboard.createAndOpen}
               </button>
               <button
                 type="button"
                 onClick={() => setShowNewModal(false)}
                 className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
               >
-                Cancel
+                {t.dashboard.cancel}
               </button>
             </div>
           </form>
@@ -158,10 +166,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white font-display tracking-tight">
-              Your Websites & Visual Projects
+              {t.dashboard.heading}
             </h1>
             <p className="text-xs text-zinc-400 mt-1 tabular-nums">
-              {projects.length} total projects saved locally · Instant restore across sessions
+              {projects.length} {t.dashboard.subCount}
             </p>
           </div>
 
@@ -170,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <input
               type="text"
               aria-label="Search projects"
-              placeholder="Filter projects by name or category..."
+              placeholder={t.dashboard.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs bg-[#111116] border border-zinc-800 rounded-lg text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -182,7 +190,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {recentProjects.length > 0 && !searchQuery && (
           <section>
             <div className="text-xs font-semibold text-zinc-400 mb-3">
-              Recently Opened & Modified
+              {t.dashboard.recentTitle}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {recentProjects.map((proj) => (
@@ -204,7 +212,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onClick={() => onOpenProject(proj.id)}
                     className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-md transition-colors shrink-0 cursor-pointer whitespace-nowrap"
                   >
-                    Open Studio
+                    {t.dashboard.openStudio}
                   </button>
                 </div>
               ))}
@@ -215,29 +223,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* All Projects Grid */}
         <section>
           <div className="text-xs font-semibold text-zinc-400 mb-4">
-            All Workspace Projects ({filteredProjects.length})
+            {t.dashboard.allProjectsTitle} ({filteredProjects.length})
           </div>
 
           {filteredProjects.length === 0 ? (
             <div className="p-12 bg-[#111116] border border-zinc-800 rounded-xl text-center space-y-3">
               <FolderOpen className="w-8 h-8 text-zinc-500 mx-auto" />
-              <div className="text-base font-bold text-white">No matching projects found</div>
-              <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                Create a new blank project or select one of the 6 curated templates below to launch the visual editor.
-              </p>
+              <div className="text-base font-bold text-white">{t.dashboard.emptyTitle}</div>
+              <p className="text-xs text-zinc-400 max-w-md mx-auto">{t.dashboard.emptyDesc}</p>
               <button
                 type="button"
                 onClick={() => onCreateBlank('New Visual Website')}
                 className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors cursor-pointer"
               >
-                Create First Project
+                {t.dashboard.createFirstBtn}
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProjects.map((proj) => {
-                const tpl = TEMPLATES.find((t) => t.id === proj.templateId);
+                const tpl = templates.find((item) => item.id === proj.templateId);
+                const firstPage = proj.pages[0];
+                const firstImgEl = firstPage
+                  ? Object.values(firstPage.elements).find(
+                      (el) => el.type === 'image' && el.assets.src
+                    )
+                  : undefined;
                 const previewImg =
+                  firstImgEl?.assets.src ||
                   tpl?.previewImage ||
                   '/src/assets/images/template_modern_business_1794725846334.jpg';
 
@@ -256,7 +269,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end justify-between p-3.5 text-[11px] text-zinc-300 tabular-nums">
                           <span>{proj.category}</span>
-                          <span>{proj.pages.length} Page(s)</span>
+                          <span>
+                            {proj.pages.length} {t.dashboard.pagesCount}
+                          </span>
                         </div>
                       </div>
 
@@ -279,7 +294,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               onClick={() => handleCommitRename(proj.id)}
                               className="px-2.5 py-1 text-xs font-semibold bg-blue-600 text-white rounded cursor-pointer"
                             >
-                              Save
+                              {t.dashboard.save}
                             </button>
                           </div>
                         ) : (
@@ -304,7 +319,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         </p>
 
                         <div className="text-[11px] text-zinc-500 tabular-nums">
-                          Updated {new Date(proj.updatedAt).toLocaleString()}
+                          {t.dashboard.updatedAt} {new Date(proj.updatedAt).toLocaleString()}
                         </div>
                       </div>
                     </div>
@@ -316,14 +331,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         onClick={() => onOpenProject(proj.id)}
                         className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap"
                       >
-                        Edit in Studio
+                        {t.dashboard.editInStudio}
                       </button>
                       <button
                         type="button"
                         aria-label={`Preview ${proj.name}`}
                         onClick={() => onPreviewProject(proj)}
                         className="p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-                        title="Live Preview"
+                        title={t.dashboard.previewTitle}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -332,7 +347,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         aria-label={`Export ZIP for ${proj.name}`}
                         onClick={() => onExportProjectZip(proj)}
                         className="p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-                        title="Download ZIP"
+                        title={t.dashboard.exportZipTitle}
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -341,7 +356,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         aria-label={`Duplicate ${proj.name}`}
                         onClick={() => onDuplicateProject(proj.id)}
                         className="p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-                        title="Duplicate Project"
+                        title={t.dashboard.duplicateTitle}
                       >
                         <Copy className="w-4 h-4" />
                       </button>
@@ -350,7 +365,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         aria-label={`Delete ${proj.name}`}
                         onClick={() => onDeleteProject(proj.id)}
                         className="p-2 bg-zinc-900 hover:bg-red-950/60 text-zinc-400 hover:text-red-400 border border-zinc-800 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Project"
+                        title={t.dashboard.deleteTitle}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -366,15 +381,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <section className="pt-6 border-t border-zinc-900">
           <div className="mb-6">
             <h2 className="text-lg font-bold text-white font-display">
-              Create New Project from Template
+              {t.dashboard.fromTemplateHeading}
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Choose any of the 6 complete industry templates to initialize a new editable document.
-            </p>
+            <p className="text-xs text-zinc-400 mt-0.5">{t.dashboard.fromTemplateSub}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {TEMPLATES.map((tpl) => (
+            {templates.map((tpl) => (
               <div
                 key={`dash_tpl_${tpl.id}`}
                 className="p-4 bg-[#111116] border border-zinc-800/90 rounded-xl flex flex-col justify-between gap-4 hover:border-zinc-700 transition-colors"
@@ -386,14 +399,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     referrerPolicy="no-referrer"
                     className="w-20 h-16 rounded-lg object-cover shrink-0 border border-zinc-800"
                   />
-                  <div className="min-w-0">
-                    <div className="text-sm font-bold text-white font-display truncate">
-                      {tpl.name}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-sm font-bold text-white font-display truncate">
+                        {tpl.name}
+                      </div>
+                      {tpl.isCustom && (
+                        <button
+                          type="button"
+                          aria-label={`Delete custom template ${tpl.name}`}
+                          onClick={() => onDeleteCustomTemplate(tpl.id)}
+                          className="text-zinc-500 hover:text-red-400 cursor-pointer"
+                          title={t.dashboard.deleteTemplate}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
-                    <div className="text-[11px] text-zinc-400 mt-0.5">{tpl.category}</div>
-                    <p className="text-[11px] text-zinc-500 line-clamp-2 mt-1">
-                      {tpl.tagline}
-                    </p>
+                    <div className="text-[11px] text-zinc-400 mt-0.5">
+                      {tpl.isCustom ? t.dashboard.customTemplateBadge : tpl.category}
+                    </div>
+                    <p className="text-[11px] text-zinc-500 line-clamp-2 mt-1">{tpl.tagline}</p>
                   </div>
                 </div>
 
@@ -402,7 +428,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onClick={() => onCreateFromTemplate(tpl.id)}
                   className="w-full py-2 px-3 bg-zinc-900 hover:bg-blue-600 text-zinc-200 hover:text-white border border-zinc-800 hover:border-blue-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap"
                 >
-                  Use {tpl.name} Template
+                  {t.dashboard.useTemplate}: {tpl.name}
                 </button>
               </div>
             ))}

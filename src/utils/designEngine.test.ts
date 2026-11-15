@@ -8,6 +8,7 @@ import {
   duplicateElementInPage,
   groupElementsInPage,
   applyLocalAIAssistantCommand,
+  isImageReplaceCommand,
   compileProjectToCode,
 } from './designEngine';
 import { DesignPage, DesignProject } from '../types/design';
@@ -87,27 +88,45 @@ test('groupElementsInPage wraps selected elements inside a new container and del
   assert.equal(afterDelete.elements['root_frame'].children.length, 0);
 });
 
-test('applyLocalAIAssistantCommand transforms element styles and responsive rules deterministically', () => {
+test('applyLocalAIAssistantCommand transforms element styles in both Russian and English and detects image replacement', () => {
   const section = createDefaultElement('section', 'root_frame', {
     name: 'Hero Section',
   });
   const { updated, summary } = applyLocalAIAssistantCommand(
     section,
-    'Make this section more modern and responsive with dark background'
+    'Сделать секцию современной и адаптивной с тёмным фоном'
   );
   assert.equal(updated.styles.background, '#09090B');
   assert.ok(updated.responsive.mobile);
   assert.ok(updated.responsive.tablet);
   assert.ok(summary.includes('Hero Section'));
+
+  assert.equal(isImageReplaceCommand('Replace this image'), true);
+  assert.equal(isImageReplaceCommand('Заменить это изображение'), true);
+  const imgEl = createDefaultElement('image', 'root_frame', { name: 'Banner Photo' });
+  const imgResult = applyLocalAIAssistantCommand(imgEl, 'Replace this image');
+  assert.equal(imgResult.requiresImageSelection, true);
 });
 
-test('compileProjectToCode generates complete HTML, CSS, JS, and React output', () => {
+test('compileProjectToCode generates complete HTML, CSS, JS, and React output including image crop transforms', () => {
   let page = createSamplePage();
   const headline = createDefaultElement('text', 'root_frame', {
     id: 'hero_title',
     metadata: { content: 'Design once. Build instantly.' },
   });
+  const photo = createDefaultElement('image', 'root_frame', {
+    id: 'hero_photo',
+    assets: {
+      src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      alt: 'Custom Uploaded Photo',
+      objectFit: 'cover',
+      cropZoom: 1.25,
+      cropX: 40,
+      cropY: 60,
+    },
+  });
   page = addElementToPage(page, headline, 'root_frame');
+  page = addElementToPage(page, photo, 'root_frame');
 
   const project: DesignProject = {
     id: 'proj_test',
@@ -125,6 +144,7 @@ test('compileProjectToCode generates complete HTML, CSS, JS, and React output', 
   const bundle = compileProjectToCode(project);
   assert.ok(bundle.html.includes('<!DOCTYPE html>'));
   assert.ok(bundle.html.includes('Design once. Build instantly.'));
+  assert.ok(bundle.html.includes('transform:scale(1.25)'));
   assert.ok(bundle.css.includes('.sc-el-hero_title'));
   assert.ok(bundle.react.includes('export default function GeneratedSite'));
 });
