@@ -459,7 +459,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   return (
-    <div id="top" className="min-h-screen bg-[#060608] text-[#F4F4F6] flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
+    <div id="top" className="min-h-screen bg-[#060608] text-[#F4F4F6] flex flex-col selection:bg-blue-500/30 overflow-x-clip">
       {/* =====================================================================
           STICKY ARCHITECTURAL HEADER
       ===================================================================== */}
