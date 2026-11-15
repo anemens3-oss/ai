@@ -22,7 +22,9 @@ import {
   FileText,
   Frame,
   Grid,
+  Hand,
   Image as ImageIcon,
+  Layers,
   Layout,
   Lock,
   Monitor,
@@ -119,11 +121,12 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
 
   const [leftTab, setLeftTab] = useState<LeftTab>('layers');
   const [rightTab, setRightTab] = useState<RightTab>('inspector');
-  const [activeTool, setActiveTool] = useState<'select' | ElementType>('select');
+  const [activeTool, setActiveTool] = useState<'select' | 'move' | ElementType>('select');
   const [viewport, setViewport] = useState<ViewportMode>('desktop');
-  const [zoom, setZoom] = useState<number>(0.64);
+  const [zoom, setZoom] = useState<number>(0.6);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [showGuides, setShowGuides] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const activePage: DesignPage =
     project.pages.find((p) => p.id === project.activePageId) || project.pages[0];
@@ -192,6 +195,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
     if (recordHistory) {
       setUndoStack((prev) => [...prev.slice(-24), structuredClone(project.pages)]);
       setRedoStack([]);
+      setIsSaving(true);
+      setTimeout(() => setIsSaving(false), 550);
     }
     const nextPages = project.pages.map((p) => (p.id === nextPage.id ? nextPage : p));
     onUpdateProject({
@@ -1138,7 +1143,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         onMouseDown={(e) => {
           e.stopPropagation();
           setContextMenu(null);
-          if (activeTool !== 'select') {
+          if (activeTool !== 'select' && activeTool !== 'move') {
             handleAddElement(activeTool, isRoot ? el.id : activePage.rootId);
             return;
           }
@@ -1313,8 +1318,18 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
             className="px-2 py-1 text-xs font-bold text-white bg-transparent hover:bg-zinc-900 focus:bg-zinc-900 border border-transparent focus:border-zinc-700 rounded focus:outline-none w-36 truncate font-display"
           />
 
+          {/* Micro-Animated Save Status Indicator */}
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-900/70 border border-zinc-800/80 text-[10px] font-mono text-zinc-400 shrink-0">
+            <span
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                isSaving ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'
+              }`}
+            />
+            <span>{isSaving ? t.editor.savingBadge : t.editor.savedBadge}</span>
+          </div>
+
           {/* Undo / Redo / Copy / Duplicate / Delete / Save as Template */}
-          <div className="hidden xl:flex items-center gap-0.5 pl-2 border-l border-zinc-800">
+          <div className="hidden xl:flex items-center gap-0.5 pl-2 border-l border-zinc-800 shrink-0">
             <button
               type="button"
               aria-label="Undo"
@@ -1376,7 +1391,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         </div>
 
         {/* Center: Element Creation Toolbelt */}
-        <div className="flex items-center gap-1 bg-[#09090B] p-1 rounded-lg border border-zinc-800">
+        <div className="flex items-center gap-1 bg-[#09090B] p-1 rounded-lg border border-zinc-800 shrink-0">
           {(
             [
               { id: 'select', label: t.editor.toolSelect, icon: MousePointer },
@@ -1393,6 +1408,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               <button
                 key={tool.id}
                 type="button"
+                aria-label={tool.label}
+                title={tool.label}
                 onClick={() => {
                   if (tool.id === 'select') {
                     setActiveTool('select');
@@ -1400,14 +1417,14 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                     handleAddElement(tool.id);
                   }
                 }}
-                className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+                className={`px-2 py-1.5 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
                   activeTool === tool.id
                     ? 'bg-blue-600 text-white'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">{tool.label}</span>
+                <span className="hidden 2xl:inline">{tool.label}</span>
               </button>
             );
           })}
@@ -3378,6 +3395,216 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               </div>
             </div>
           )}
+        </aside>
+
+        {/* ARTCRAFT-INSPIRED RIGHT VERTICAL TOOLBAR RAIL */}
+        <aside
+          aria-label="Studio Right Vertical Toolbar"
+          className="w-12 bg-[#09090D] border-l border-zinc-800/90 flex flex-col items-center py-2.5 gap-1.5 shrink-0 z-30"
+        >
+          {/* Group 1: Pointer & Move */}
+          <div className="flex flex-col items-center gap-1 w-full px-1.5">
+            {(
+              [
+                {
+                  id: 'select',
+                  label: t.editor.toolSelect,
+                  shortcut: 'V',
+                  icon: MousePointer,
+                  active: activeTool === 'select',
+                  onClick: () => setActiveTool('select'),
+                },
+                {
+                  id: 'move',
+                  label: t.editor.toolMove,
+                  shortcut: 'H',
+                  icon: Hand,
+                  active: activeTool === 'move',
+                  onClick: () => setActiveTool('move'),
+                },
+              ] as const
+            ).map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.label}
+                  onClick={item.onClick}
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                    item.active
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {item.active && (
+                    <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white rounded-r" />
+                  )}
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                    <span>{item.label}</span>
+                    <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
+                      {item.shortcut}
+                    </kbd>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="w-6 h-px bg-zinc-800/90 my-0.5" />
+
+          {/* Group 2: Canvas Primitives (Frame, Section, Text, Image, Shape) */}
+          <div className="flex flex-col items-center gap-1 w-full px-1.5">
+            {(
+              [
+                {
+                  id: 'frame',
+                  label: t.editor.toolFrame,
+                  shortcut: 'F',
+                  icon: Frame,
+                  type: 'container' as ElementType,
+                },
+                {
+                  id: 'section',
+                  label: t.editor.toolSection,
+                  shortcut: 'S',
+                  icon: Layout,
+                  type: 'section' as ElementType,
+                },
+                {
+                  id: 'text',
+                  label: t.editor.toolText,
+                  shortcut: 'T',
+                  icon: TypeIcon,
+                  type: 'text' as ElementType,
+                },
+                {
+                  id: 'image',
+                  label: t.editor.toolImage,
+                  shortcut: 'I',
+                  icon: ImageIcon,
+                  type: 'image' as ElementType,
+                },
+                {
+                  id: 'shape',
+                  label: t.editor.toolCard,
+                  shortcut: 'R',
+                  icon: Square,
+                  type: 'rectangle' as ElementType,
+                },
+              ] as const
+            ).map((item) => {
+              const Icon = item.icon;
+              const isAct = activeTool === item.type;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.label}
+                  onClick={() => handleAddElement(item.type)}
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                    isAct
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                    <span>{item.label}</span>
+                    <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
+                      {item.shortcut}
+                    </kbd>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="w-6 h-px bg-zinc-800/90 my-0.5" />
+
+          {/* Group 3: Studio Drawers (Components, Assets, Layers, AI Assistant) */}
+          <div className="flex flex-col items-center gap-1 w-full px-1.5">
+            {(
+              [
+                {
+                  id: 'rail-components',
+                  label: t.editor.railComponents,
+                  shortcut: 'B',
+                  icon: Box,
+                  active: leftTab === 'components',
+                  onClick: () => setLeftTab('components'),
+                },
+                {
+                  id: 'rail-assets',
+                  label: t.editor.railAssets,
+                  shortcut: 'A',
+                  icon: Upload,
+                  active: leftTab === 'assets',
+                  onClick: () => setLeftTab('assets'),
+                },
+                {
+                  id: 'rail-layers',
+                  label: t.editor.railLayers,
+                  shortcut: 'L',
+                  icon: Layers,
+                  active: leftTab === 'layers',
+                  onClick: () => setLeftTab('layers'),
+                },
+                {
+                  id: 'rail-ai',
+                  label: t.editor.railAi,
+                  shortcut: 'AI',
+                  icon: Sparkles,
+                  active: rightTab === 'ai',
+                  onClick: () => setRightTab(rightTab === 'ai' ? 'inspector' : 'ai'),
+                },
+              ] as const
+            ).map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.label}
+                  onClick={item.onClick}
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                    item.active
+                      ? 'bg-blue-600/25 text-blue-300 border border-blue-500/40'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {item.active && (
+                    <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  )}
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                    <span>{item.label}</span>
+                    <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
+                      {item.shortcut}
+                    </kbd>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-auto flex flex-col items-center gap-1 w-full px-1.5 pt-2 border-t border-zinc-800/80">
+            <button
+              type="button"
+              aria-label={t.editor.railPreview}
+              onClick={() => onOpenLivePreview(project)}
+              className="group relative w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                <span>{t.editor.railPreview}</span>
+                <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
+                  P
+                </kbd>
+              </span>
+            </button>
+          </div>
         </aside>
       </div>
     </div>
