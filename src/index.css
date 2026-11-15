@@ -6,6 +6,8 @@
     --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+    --hero-px: 0px;
+    --hero-py: 0px;
   }
 
   html {
@@ -37,7 +39,195 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Infinite Logo Wall Marquee */
+/* ============================================================================
+   1. HERO ORBITAL & FLOATING TECH LOGOS CHOREOGRAPHY
+============================================================================ */
+@keyframes sc-orbit-cw {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sc-orbit-ccw {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes sc-float-drift-a {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(18px, -22px, 0) rotate(6deg);
+  }
+  50% {
+    transform: translate3d(-12px, -36px, 0) rotate(-4deg);
+  }
+  75% {
+    transform: translate3d(-24px, -14px, 0) rotate(5deg);
+  }
+}
+
+@keyframes sc-float-drift-b {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(-22px, 20px, 0) rotate(-7deg);
+  }
+  66% {
+    transform: translate3d(20px, -18px, 0) rotate(7deg);
+  }
+}
+
+@keyframes sc-float-drift-c {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(16px, 26px, 0) rotate(-6deg) scale(1.05);
+  }
+}
+
+@keyframes sc-ambient-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08) translate3d(12px, -10px, 0);
+  }
+}
+
+.animate-sc-orbit-cw {
+  animation: sc-orbit-cw var(--orbit-duration, 36s) linear infinite;
+}
+
+.animate-sc-orbit-ccw {
+  animation: sc-orbit-ccw var(--orbit-duration, 36s) linear infinite;
+}
+
+.animate-sc-float-a {
+  animation: sc-float-drift-a var(--float-duration, 18s) ease-in-out infinite;
+}
+
+.animate-sc-float-b {
+  animation: sc-float-drift-b var(--float-duration, 22s) ease-in-out infinite;
+}
+
+.animate-sc-float-c {
+  animation: sc-float-drift-c var(--float-duration, 26s) ease-in-out infinite;
+}
+
+.animate-sc-ambient {
+  animation: sc-ambient-pulse 14s ease-in-out infinite;
+}
+
+/* Parallax Depth Layers driven by CSS vars (--hero-px, --hero-py) */
+.sc-parallax-deep {
+  transform: translate3d(calc(var(--hero-px, 0px) * -0.35), calc(var(--hero-py, 0px) * -0.35), 0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.sc-parallax-mid {
+  transform: translate3d(calc(var(--hero-px, 0px) * 0.55), calc(var(--hero-py, 0px) * 0.55), 0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.sc-parallax-fore {
+  transform: translate3d(calc(var(--hero-px, 0px) * 0.95), calc(var(--hero-py, 0px) * 0.95), 0);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ============================================================================
+   2. INTERSECTION OBSERVER SCROLL REVEAL SYSTEM
+   opacity: 0 -> 1 | translateY: 45px -> 0 | scale: 0.96 -> 1 | blur(8px) -> 0
+============================================================================ */
+.sc-reveal {
+  opacity: 0;
+  transform: translate3d(0, 45px, 0) scale(0.96);
+  filter: blur(8px);
+  transition:
+    opacity 0.78s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.78s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.78s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+.sc-reveal.sc-reveal-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0px);
+}
+
+/* ============================================================================
+   3. PREMIUM CARD HOVER SYSTEM
+============================================================================ */
+.sc-premium-card {
+  position: relative;
+  transition:
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.sc-premium-card:hover {
+  transform: translate3d(0, -6px, 0);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 24px 52px -12px rgba(0, 0, 0, 0.88),
+    0 0 32px -4px rgba(59, 130, 246, 0.14);
+}
+
+.sc-premium-card .sc-card-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    420px circle at 50% 0%,
+    rgba(96, 165, 250, 0.11),
+    rgba(255, 255, 255, 0.03) 45%,
+    transparent 80%
+  );
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s ease;
+}
+
+.sc-premium-card:hover .sc-card-glow {
+  opacity: 1;
+  transform: translate3d(0, 4px, 0) scale(1.03);
+}
+
+.sc-premium-card .sc-card-detail {
+  opacity: 0.55;
+  transform: translate3d(-3px, 0, 0);
+  transition:
+    opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sc-premium-card:hover .sc-card-detail {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ============================================================================
+   4. INFINITE LOGO WALL MARQUEE
+============================================================================ */
 @keyframes sc-marquee {
   0% {
     transform: translate3d(0, 0, 0);
@@ -79,8 +269,20 @@
   html {
     scroll-behavior: auto;
   }
-  .animate-sc-marquee {
+  .animate-sc-marquee,
+  .animate-sc-orbit-cw,
+  .animate-sc-orbit-ccw,
+  .animate-sc-float-a,
+  .animate-sc-float-b,
+  .animate-sc-float-c,
+  .animate-sc-ambient {
     animation: none !important;
+  }
+  .sc-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
   }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

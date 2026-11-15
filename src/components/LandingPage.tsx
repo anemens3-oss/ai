@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowRight,
   ArrowUpRight,
-  Box,
   Check,
   Code2,
   Copy,
   Crop,
+  Download,
   Eye,
   EyeOff,
   Frame,
   Hand,
   Image as ImageIcon,
   Layers,
-  Layout,
   Lock,
   Menu,
   Monitor,
@@ -28,11 +27,12 @@ import {
   Tablet,
   Type as TypeIcon,
   Unlock,
-  Upload,
   X,
 } from 'lucide-react';
 import { TemplateDefinition, ViewportMode } from '../types/design';
 import { LanguageSwitcher, useI18n } from '../i18n/I18nContext';
+import { HeroTechBackground } from './HeroTechBackground';
+import { ScrollReveal } from './ScrollReveal';
 
 interface LandingPageProps {
   templates: TemplateDefinition[];
@@ -168,6 +168,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   const { lang, t } = useI18n();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const parallaxRafRef = useRef<number | null>(null);
+
+  // =========================================================================
+  // HERO PARALLAX MOUSE HANDLER (Compositor CSS Variables, Zero React Re-renders)
+  // =========================================================================
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const el = heroSectionRef.current;
+    if (!el) return;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    if (parallaxRafRef.current) cancelAnimationFrame(parallaxRafRef.current);
+    parallaxRafRef.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const normX = (clientX - rect.left) / rect.width - 0.5;
+      const normY = (clientY - rect.top) / rect.height - 0.5;
+      el.style.setProperty('--hero-px', `${(normX * 26).toFixed(1)}px`);
+      el.style.setProperty('--hero-py', `${(normY * 22).toFixed(1)}px`);
+    });
+  };
+
+  const handleHeroMouseLeave = () => {
+    const el = heroSectionRef.current;
+    if (!el) return;
+    el.style.setProperty('--hero-px', '0px');
+    el.style.setProperty('--hero-py', '0px');
+  };
 
   // =========================================================================
   // HERO AUTONOMOUS + INTERACTIVE STUDIO SCENE STATE
@@ -225,7 +252,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return () => clearInterval(timer);
   }, [heroAutoPlay]);
 
-  // Cursor target coordinates inside Hero Studio Stage (%)
   const cursorTargets = [
     { x: '38%', y: '36%', label: t.hero.cursorDesigner },
     { x: '82%', y: '44%', label: t.hero.cursorDesigner },
@@ -252,7 +278,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   // =========================================================================
   const targetAiPrompt: string = t.sections.s02DefaultPrompt;
   const [typedAiPrompt, setTypedAiPrompt] = useState<string>(targetAiPrompt);
-  const [aiStage, setAiStage] = useState<number>(4); // 0..4 (4 = complete)
+  const [aiStage, setAiStage] = useState<number>(4);
   const [isAiAnimating, setIsAiAnimating] = useState(false);
 
   const runAiDemoSequence = () => {
@@ -389,7 +415,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   // =========================================================================
-  // SECTION 04: EVERY DETAIL MATTERS MICRO-LABS STATE
+  // SECTION 04: EVERY DETAIL MATTERS (4 INTERACTIVE MICRO-LABS)
   // =========================================================================
   const [detailFontSize, setDetailFontSize] = useState(38);
   const [detailTracking, setDetailTracking] = useState(-0.03);
@@ -400,6 +426,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     { id: 'l2', name: 'Glass Surface Card', type: 'FRAME', locked: true, hidden: false },
     { id: 'l3', name: 'Keynote Photograph', type: 'IMAGE', locked: false, hidden: false },
   ]);
+  const [detailExportFormat, setDetailExportFormat] = useState<'zip' | 'react' | 'html'>('zip');
 
   // =========================================================================
   // SECTION 05: RESPONSIVE BY DEFAULT STATE
@@ -432,11 +459,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   return (
-    <div id="top" className="min-h-screen bg-[#060608] text-[#F4F4F6] flex flex-col selection:bg-blue-500/30">
+    <div id="top" className="min-h-screen bg-[#060608] text-[#F4F4F6] flex flex-col selection:bg-blue-500/30 overflow-x-hidden">
       {/* =====================================================================
           STICKY ARCHITECTURAL HEADER
       ===================================================================== */}
-      <header className="sticky top-0 z-50 h-16 bg-[#060608]/85 backdrop-blur-xl border-b border-white/[0.07] px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-50 h-16 bg-[#060608]/85 backdrop-blur-xl border-b border-white/[0.07] px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-2 sm:gap-4">
         <a
           href="#top"
           className="flex items-center gap-2.5 text-sm font-extrabold tracking-tight text-white font-display whitespace-nowrap shrink-0"
@@ -445,9 +472,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             S
           </span>
           <span>SITECRAFT</span>
-          <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono uppercase bg-white/[0.06] text-zinc-400 rounded border border-white/[0.08]">
-            STUDIO
-          </span>
         </a>
 
         <nav
@@ -491,12 +515,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </button>
         </nav>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
           <LanguageSwitcher />
           <button
             type="button"
             onClick={onStartBuilding}
-            className="px-4 py-2 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-lg transition-all whitespace-nowrap cursor-pointer shadow-sm active:scale-[0.98]"
+            className="hidden sm:inline-flex px-4 py-2 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-lg transition-all whitespace-nowrap cursor-pointer shadow-sm active:scale-[0.98]"
           >
             {t.nav.startCreating}
           </button>
@@ -557,31 +581,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       <main className="flex-1">
         {/* ===================================================================
-            HERO SECTION: "Your vision. Our canvas." + LIVE STUDIO STAGE
+            HERO SECTION: "Your vision. Our canvas." + ORBITAL/FLOATING LOGOS + LIVE STUDIO STAGE
         =================================================================== */}
-        <section className="relative pt-12 pb-16 lg:pt-16 lg:pb-20 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07] overflow-hidden">
-          {/* Subtle architectural radial glow */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[920px] h-[420px] bg-radial from-white/[0.05] via-blue-500/[0.03] to-transparent blur-3xl"
-          />
+        <section
+          ref={heroSectionRef}
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
+          className="relative pt-14 pb-18 lg:pt-20 lg:pb-24 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07] overflow-hidden"
+        >
+          {/* GetArtCraft-Inspired Animated Background with 14 Colored Tech Logos & Orbital Trajectories */}
+          <HeroTechBackground />
 
-          <div className="max-w-[1380px] mx-auto relative">
+          <div className="max-w-[1380px] mx-auto relative z-10">
             {/* Hero Editorial Header */}
             <motion.div
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55 }}
-              className="max-w-4xl mx-auto text-center space-y-5 mb-10 lg:mb-12"
+              transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-3xl mx-auto text-center space-y-5 mb-12 lg:mb-14"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-[11px] font-mono uppercase tracking-[0.14em] text-zinc-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                <span>{t.hero.badge}</span>
+              <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-blue-400">
+                {t.hero.badge}
               </div>
 
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.04em] leading-[0.98] text-white">
                 <span className="block">{t.hero.titleLine1}</span>
-                <span className="block text-zinc-400">{t.hero.titleLine2}</span>
+                <span className="block bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
+                  {t.hero.titleLine2}
+                </span>
               </h1>
 
               {lang === 'ru' && (
@@ -594,19 +621,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {t.hero.subtitle}
               </p>
 
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
                 <button
                   type="button"
+                  data-testid="hero-start-creating-btn"
                   onClick={onStartBuilding}
-                  className="px-6 py-3.5 text-sm font-semibold text-black bg-white hover:bg-zinc-200 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-white/5 active:scale-[0.98]"
+                  className="px-6 py-3.5 text-sm font-semibold text-black bg-white hover:bg-zinc-200 rounded-xl flex items-center gap-2 transition-all duration-200 cursor-pointer shadow-[0_12px_32px_rgba(255,255,255,0.14)] hover:-translate-y-0.5 active:scale-[0.98]"
                 >
                   <span>{t.hero.startCreating}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('editor-showcase')}
-                  className="px-6 py-3.5 text-sm font-medium text-zinc-200 bg-[#111116] hover:bg-zinc-800/90 border border-white/[0.1] rounded-xl transition-all cursor-pointer active:scale-[0.98]"
+                  onClick={() => scrollToSection('core-pillars')}
+                  className="px-6 py-3.5 text-sm font-medium text-zinc-200 bg-[#111118]/90 hover:bg-zinc-800/90 border border-white/[0.12] hover:border-white/25 rounded-xl transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-[0.98] backdrop-blur-md"
                 >
                   {t.hero.explorePlatform}
                 </button>
@@ -615,11 +643,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* LIVE INTERACTIVE & AUTONOMOUS STUDIO STAGE */}
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.1 }}
+              initial={{ opacity: 0, y: 32, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.75, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
               onMouseDown={() => setHeroAutoPlay(false)}
-              className="relative rounded-2xl bg-[#0B0B0F] border border-white/[0.11] shadow-[0_32px_90px_rgba(0,0,0,0.85)] overflow-hidden"
+              className="relative rounded-2xl bg-[#0B0B0F]/95 backdrop-blur-xl border border-white/[0.12] shadow-[0_32px_90px_rgba(0,0,0,0.9)] overflow-hidden"
             >
               {/* Stage Top Chrome Bar */}
               <div className="h-11 px-4 bg-[#101016] border-b border-white/[0.08] flex items-center justify-between gap-3 text-xs">
@@ -632,9 +660,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span className="font-mono text-[11px] text-zinc-200 font-semibold truncate">
                     SITECRAFT Studio — Kronos Spatial Architecture
                   </span>
-                  <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-[10px] font-mono text-emerald-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    {t.hero.savedStatus}
+                  <span className="hidden md:inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
+                    ✓ {t.hero.savedStatus}
                   </span>
                 </div>
 
@@ -734,7 +761,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     {/* Choreography Step Indicator */}
                     <div className="pt-4 border-t border-white/[0.06] space-y-1.5">
                       <div className="text-[10px] font-mono uppercase text-zinc-500">
-                        Live Telemetry
+                        Studio Sequence
                       </div>
                       {[
                         t.hero.stepSelect,
@@ -751,7 +778,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           }}
                           className={`px-2 py-1.5 rounded text-[11px] cursor-pointer transition-colors ${
                             heroStep === idx
-                              ? 'bg-blue-600/20 text-blue-200 border-l-2 border-blue-400'
+                              ? 'bg-blue-600/20 text-blue-200 border border-blue-500/30'
                               : 'text-zinc-500 hover:text-zinc-300'
                           }`}
                         >
@@ -779,7 +806,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     backgroundSize: '20px 20px',
                   }}
                 >
-                  {/* Snap Alignment Guides when moving */}
                   {heroShowSnapGuide && (
                     <>
                       <div className="absolute inset-y-0 left-1/2 w-px bg-pink-500/80 z-20 pointer-events-none" />
@@ -789,7 +815,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </>
                   )}
 
-                  {/* Responsive Artboard Frame */}
                   <motion.div
                     layout
                     transition={{ type: 'spring', stiffness: 260, damping: 28 }}
@@ -805,9 +830,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   >
                     {heroShowPreview ? (
                       <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/[0.08]">
-                        <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                          PRODUCTION PREVIEW · https://kronos.sitecraft.app
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">
+                          ✓ PRODUCTION PREVIEW · https://kronos.sitecraft.app
                         </span>
                         <button
                           type="button"
@@ -831,7 +855,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         heroViewport === 'mobile' ? 'grid-cols-1' : 'grid-cols-12'
                       }`}
                     >
-                      {/* Editable Headline & CTA Column */}
                       <div
                         className={
                           heroViewport === 'mobile' ? 'col-span-1 space-y-4' : 'col-span-7 space-y-4'
@@ -883,7 +906,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         </motion.div>
 
                         <p className="text-xs text-zinc-400 leading-relaxed px-1">
-                           Precision-crafted digital flagship compiled directly from visual canvas primitives into clean semantic code.
+                          Precision-crafted digital flagship compiled directly from visual canvas primitives into clean semantic code.
                         </p>
 
                         <div className="px-1">
@@ -908,7 +931,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         </div>
                       </div>
 
-                      {/* Editable Image Showcase Column */}
                       <div
                         onClick={() => {
                           setHeroAutoPlay(false);
@@ -925,6 +947,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         <img
                           src="/src/assets/images/template_modern_business_1794725846334.jpg"
                           alt="Studio Showcase"
+                          referrerPolicy="no-referrer"
                           className="w-full h-48 object-cover"
                         />
                         <div className="p-2.5 bg-[#111118] flex items-center justify-between text-[10px] font-mono text-zinc-400">
@@ -938,7 +961,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* RIGHT PANEL: Properties Inspector + ArtCraft Right Vertical Toolbar Rail */}
                 <div className="lg:col-span-3 bg-[#0C0C12] border-t lg:border-t-0 lg:border-l border-white/[0.07] flex">
-                  {/* Inspector Controls */}
                   <div className="flex-1 p-3.5 space-y-4 text-xs">
                     <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
                       <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
@@ -949,7 +971,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </span>
                     </div>
 
-                    {/* Coordinates & Font Size */}
                     <div className="grid grid-cols-2 gap-2 font-mono tabular-nums">
                       <div className="p-2 rounded bg-[#08080C] border border-white/[0.06]">
                         <span className="block text-[9px] text-zinc-500">X POS</span>
@@ -1054,14 +1075,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                                 setHeroShowPreview(false);
                               }
                             }}
-                            className={`group relative w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                            className={`group relative w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
                               isActive
-                                ? 'bg-white text-black shadow-sm'
+                                ? 'bg-white text-black shadow-sm scale-105'
                                 : 'text-zinc-400 hover:text-white hover:bg-white/[0.08]'
                             }`}
                           >
-                            <Icon className="w-3.5 h-3.5" />
-                            <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute right-9 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-[#16161F] border border-white/15 text-[10px] font-medium text-white whitespace-nowrap z-40 shadow-xl">
+                            <Icon className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110" />
+                            <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-150 absolute right-9 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-[#16161F] border border-white/15 text-[10px] font-medium text-white whitespace-nowrap z-40 shadow-xl">
                               {tool.label}
                             </span>
                           </button>
@@ -1100,32 +1121,90 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </section>
 
         {/* ===================================================================
-            ANIMATED INFINITE MONOCHROME LOGO WALL (#5)
+            ANIMATED INFINITE MONOCHROME LOGO WALL
         =================================================================== */}
         <section
           aria-label={t.logoWall.kicker}
           className="py-8 bg-[#050507] border-b border-white/[0.07] overflow-hidden"
         >
-          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-10 mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+          <ScrollReveal className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-10 mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-zinc-500">
             <span>{t.logoWall.kicker}</span>
             <span>{t.logoWall.pauseHint}</span>
-          </div>
+          </ScrollReveal>
 
-          <div className="sc-edge-mask overflow-hidden">
+          <ScrollReveal delay={90} className="sc-edge-mask overflow-hidden">
             <div className="animate-sc-marquee flex items-center gap-4 py-1">
               {[...TECH_LOGOS, ...TECH_LOGOS].map((logo, idx) => (
                 <div
                   key={`${logo.id}-${idx}`}
-                  className="px-4 py-2.5 rounded-xl bg-[#0C0C10] border border-white/[0.06] hover:border-white/[0.18] text-zinc-400 hover:text-white transition-colors flex items-center gap-3 shrink-0"
+                  className="px-4 py-2.5 rounded-xl bg-[#0C0C10] border border-white/[0.06] hover:border-white/[0.18] text-zinc-400 hover:text-white transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3 shrink-0"
                 >
                   <span className="text-zinc-300">{logo.svg}</span>
                   <span className="text-xs font-display font-semibold tracking-tight">
                     {logo.name}
                   </span>
-                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/[0.04] text-zinc-500">
-                    {logo.group === 'builtWith' ? t.logoWall.builtWith : t.logoWall.poweredBy}
+                  <span className="text-[10px] font-mono text-zinc-500">
+                    · {logo.group === 'builtWith' ? t.logoWall.builtWith : t.logoWall.poweredBy}
                   </span>
                 </div>
+              ))}
+            </div>
+          </ScrollReveal>
+        </section>
+
+        {/* ===================================================================
+            CORE PLATFORM PILLARS: THE 4 MAIN ARCHITECTURE CARDS (Staggered Scroll Reveal)
+        =================================================================== */}
+        <section
+          id="core-pillars"
+          className="relative py-20 lg:py-24 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07] overflow-hidden"
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-20 right-10 w-[440px] h-[280px] rounded-full bg-blue-600/[0.05] blur-[110px]"
+          />
+
+          <div className="max-w-[1380px] mx-auto space-y-12 relative z-10">
+            <ScrollReveal className="max-w-3xl space-y-3">
+              <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
+                {t.sections.coreCardsKicker}
+              </div>
+              <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+                {t.sections.coreCardsTitle}
+              </h2>
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+                {t.sections.coreCardsSubtitle}
+              </p>
+            </ScrollReveal>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {t.sections.coreCards.map((card, idx) => (
+                <ScrollReveal key={card.id} delay={idx * 115} className="h-full">
+                  <article
+                    onClick={onStartBuilding}
+                    className="sc-premium-card h-full rounded-2xl bg-[#0B0B11] border border-white/[0.08] p-6 flex flex-col justify-between space-y-6 cursor-pointer overflow-hidden"
+                  >
+                    <div className="sc-card-glow" />
+                    <div className="space-y-3 relative z-10">
+                      <div className="flex items-center justify-between font-mono text-[11px] text-zinc-400">
+                        <span className="text-blue-400 font-bold">{card.id}</span>
+                        <span>{card.tag}</span>
+                      </div>
+                      <h3 className="font-display text-lg font-bold text-white tracking-tight">
+                        {card.title}
+                      </h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">{card.desc}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono relative z-10">
+                      <span className="text-zinc-300">{card.metric}</span>
+                      <span className="sc-card-detail text-blue-400 flex items-center gap-1">
+                        <span>Studio</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </article>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -1136,18 +1215,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         =================================================================== */}
         <section
           id="editor-showcase"
-          className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07]"
+          className="relative py-20 lg:py-28 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07] overflow-hidden"
         >
-          <div className="max-w-[1380px] mx-auto space-y-12">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex flex-col lg:flex-row lg:items-end justify-between gap-6"
-            >
+          <div className="max-w-[1380px] mx-auto space-y-12 relative z-10">
+            <ScrollReveal className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
                 <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                  {t.sections.s01Number} — STUDIO ARCHITECTURE
+                  {t.sections.s01Number}. STUDIO ARCHITECTURE
                 </div>
                 <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                   {t.sections.s01Title}
@@ -1159,56 +1233,61 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="button"
                 onClick={onStartBuilding}
-                className="self-start lg:self-auto px-5 py-2.5 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+                className="self-start lg:self-auto px-5 py-2.5 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 shrink-0"
               >
                 <span>{t.nav.startCreating}</span>
                 <ArrowUpRight className="w-4 h-4" />
               </button>
-            </motion.div>
+            </ScrollReveal>
 
             {/* 6-Step Interactive Walkthrough Selector + Live Studio Frame */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              {/* Left 6-Step Sequence List */}
-              <div className="lg:col-span-4 flex flex-col justify-between gap-2">
+              <div className="lg:col-span-4 flex flex-col justify-between gap-2.5">
                 {t.sections.s01Steps.map((s, idx) => {
                   const isActive = walkthroughStep === idx;
                   return (
-                    <button
-                      key={s.step}
-                      type="button"
-                      onClick={() => {
-                        setWalkthroughAuto(false);
-                        setWalkthroughStep(idx);
-                      }}
-                      className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        isActive
-                          ? 'bg-[#12121A] border-white/20 shadow-lg'
-                          : 'bg-[#0A0A0E] border-white/[0.06] hover:border-white/15'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span
-                          className={`font-mono text-[11px] font-bold ${
-                            isActive ? 'text-blue-400' : 'text-zinc-500'
-                          }`}
-                        >
-                          STEP {s.step}
-                        </span>
-                        {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-                        )}
-                      </div>
-                      <div className="text-xs font-bold font-display text-white mb-0.5">
-                        {s.title}
-                      </div>
-                      <p className="text-[11px] text-zinc-400 leading-snug">{s.desc}</p>
-                    </button>
+                    <ScrollReveal key={s.step} delay={idx * 75}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWalkthroughAuto(false);
+                          setWalkthroughStep(idx);
+                        }}
+                        className={`sc-premium-card w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer overflow-hidden ${
+                          isActive
+                            ? 'bg-[#12121A] border-white/25 shadow-lg'
+                            : 'bg-[#0A0A0E] border-white/[0.06] hover:border-white/15'
+                        }`}
+                      >
+                        <div className="sc-card-glow" />
+                        <div className="flex items-center justify-between mb-1 relative z-10">
+                          <span
+                            className={`font-mono text-[11px] font-bold ${
+                              isActive ? 'text-blue-400' : 'text-zinc-500'
+                            }`}
+                          >
+                            STEP {s.step}
+                          </span>
+                          <span className="sc-card-detail font-mono text-[10px] text-zinc-400">
+                            {isActive ? 'ACTIVE' : 'SELECT →'}
+                          </span>
+                        </div>
+                        <div className="text-xs font-bold font-display text-white mb-0.5 relative z-10">
+                          {s.title}
+                        </div>
+                        <p className="text-[11px] text-zinc-400 leading-snug relative z-10">
+                          {s.desc}
+                        </p>
+                      </button>
+                    </ScrollReveal>
                   );
                 })}
               </div>
 
-              {/* Right Live Mirror of the 6-Step Editor Process */}
-              <div className="lg:col-span-8 rounded-2xl bg-[#0B0B10] border border-white/[0.1] overflow-hidden flex flex-col">
+              <ScrollReveal
+                delay={160}
+                className="lg:col-span-8 rounded-2xl bg-[#0B0B10] border border-white/[0.1] overflow-hidden flex flex-col shadow-2xl"
+              >
                 <div className="h-10 px-4 bg-[#111118] border-b border-white/[0.07] flex items-center justify-between text-[11px] font-mono text-zinc-400">
                   <span>
                     STEP 0{walkthroughStep + 1} · {t.sections.s01Steps[walkthroughStep].title}
@@ -1223,7 +1302,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
 
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 min-h-[380px]">
-                  {/* Mini Layers */}
                   <div className="sm:col-span-3 border-b sm:border-b-0 sm:border-r border-white/[0.06] p-3 bg-[#09090D] space-y-2">
                     <div className="text-[10px] font-mono uppercase text-zinc-500">Layers</div>
                     <div className="px-2 py-1.5 rounded bg-blue-600/20 border border-blue-500/40 text-[11px] text-blue-200 font-medium">
@@ -1237,7 +1315,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Center Live Canvas */}
                   <div
                     className="sm:col-span-5 p-5 bg-[#070709] flex flex-col justify-center relative"
                     style={{
@@ -1276,7 +1353,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </motion.div>
                   </div>
 
-                  {/* Right Properties + Vertical Rail */}
                   <div className="sm:col-span-4 bg-[#0C0C12] border-t sm:border-t-0 sm:border-l border-white/[0.06] flex">
                     <div className="flex-1 p-3 space-y-3 text-[11px]">
                       <div className="font-mono text-[10px] uppercase text-zinc-400">
@@ -1328,7 +1404,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </div>
                     </div>
 
-                    {/* Mini Right Vertical Toolbar */}
                     <div className="w-10 bg-[#08080C] border-l border-white/[0.06] py-2 flex flex-col items-center gap-1.5">
                       <span
                         className={`p-1.5 rounded ${
@@ -1363,22 +1438,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
 
         {/* ===================================================================
-            SECTION 02 — AI THAT UNDERSTANDS YOUR VISION (#7 & #8)
+            SECTION 02 — AI THAT UNDERSTANDS YOUR VISION
         =================================================================== */}
         <section
           id="ai-engine"
-          className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 bg-[#08080C] border-b border-white/[0.07]"
+          className="relative py-20 lg:py-28 px-4 sm:px-6 lg:px-10 bg-[#08080C] border-b border-white/[0.07] overflow-hidden"
         >
-          <div className="max-w-[1380px] mx-auto space-y-12">
-            <div className="max-w-3xl space-y-3">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-16 left-12 w-[480px] h-[300px] rounded-full bg-indigo-500/[0.05] blur-[120px]"
+          />
+
+          <div className="max-w-[1380px] mx-auto space-y-12 relative z-10">
+            <ScrollReveal className="max-w-3xl space-y-3">
               <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                {t.sections.s02Number} — GENERATIVE SPATIAL ENGINE
+                {t.sections.s02Number}. GENERATIVE SPATIAL ENGINE
               </div>
               <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                 {t.sections.s02Title}
@@ -1386,11 +1466,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
                 {t.sections.s02Subtitle}
               </p>
-            </div>
+            </ScrollReveal>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left: Prompt Console & Synthesis Pipeline */}
-              <div className="lg:col-span-5 rounded-2xl bg-[#0D0D14] border border-white/[0.1] p-5 space-y-5">
+              <ScrollReveal
+                delay={80}
+                className="lg:col-span-5 rounded-2xl bg-[#0D0D14] border border-white/[0.1] p-5 space-y-5"
+              >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono uppercase text-zinc-400 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-blue-400" />
@@ -1406,7 +1488,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                 </div>
 
-                {/* Animated Prompt Box */}
                 <div className="p-4 rounded-xl bg-[#07070A] border border-white/[0.08] font-mono text-xs text-zinc-100 min-h-[76px] flex items-center">
                   <span>
                     "{typedAiPrompt}"
@@ -1416,7 +1497,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </span>
                 </div>
 
-                {/* 4 Synthesis Stages */}
                 <div className="space-y-2">
                   {[
                     { id: 1, label: t.sections.s02Stage1 },
@@ -1446,10 +1526,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <p className="text-[11px] text-zinc-500 leading-relaxed border-t border-white/[0.06] pt-3">
                   {t.sections.s02DemoDisclaimer}
                 </p>
-              </div>
+              </ScrollReveal>
 
-              {/* Right: Progressively Synthesized Website Layout */}
-              <div className="lg:col-span-7 rounded-2xl bg-[#0B0B10] border border-white/[0.1] p-5 sm:p-6 space-y-4">
+              <ScrollReveal
+                delay={190}
+                className="lg:col-span-7 rounded-2xl bg-[#0B0B10] border border-white/[0.1] p-5 sm:p-6 space-y-4"
+              >
                 <div className="flex items-center justify-between text-xs pb-3 border-b border-white/[0.07]">
                   <span className="font-mono text-[11px] text-zinc-400">
                     {aiStage < 4 ? t.sections.s02Generating : t.sections.s02Ready}
@@ -1463,7 +1545,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                 </div>
 
-                {/* Stage 1+: Navigation Bar */}
                 <motion.div
                   animate={{ opacity: aiStage >= 1 ? 1 : 0.25 }}
                   className="px-4 py-2.5 rounded-lg bg-[#12121A] border border-white/[0.07] flex items-center justify-between text-xs"
@@ -1480,7 +1561,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 </motion.div>
 
-                {/* Stage 2+: Dark Aesthetic Hero Section */}
                 <motion.div
                   animate={{ opacity: aiStage >= 2 ? 1 : 0.2 }}
                   className="p-5 rounded-xl bg-gradient-to-br from-[#12121A] to-[#09090D] border border-white/[0.08] space-y-2"
@@ -1496,7 +1576,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </p>
                 </motion.div>
 
-                {/* Stage 4: Selected Works Cards */}
                 <motion.div
                   animate={{ opacity: aiStage >= 4 ? 1 : 0.15 }}
                   className="grid grid-cols-1 sm:grid-cols-3 gap-3"
@@ -1517,35 +1596,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   ].map((card) => (
                     <div
                       key={card.title}
-                      className="p-2.5 rounded-xl bg-[#111118] border border-white/[0.07] space-y-2"
+                      className="sc-premium-card p-2.5 rounded-xl bg-[#111118] border border-white/[0.07] space-y-2 overflow-hidden group"
                     >
-                      <img
-                        src={card.img}
-                        alt={card.title}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
+                      <div className="overflow-hidden rounded-lg">
+                        <img
+                          src={card.img}
+                          alt={card.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-24 object-cover rounded-lg transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
                       <div className="text-[11px] font-display font-semibold text-zinc-200">
                         {card.title}
                       </div>
                     </div>
                   ))}
                 </motion.div>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
 
         {/* ===================================================================
-            SECTION 03 — FROM CANVAS TO CODE (#8)
+            SECTION 03 — FROM CANVAS TO CODE
         =================================================================== */}
         <section
           id="code-compiler"
           className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07]"
         >
           <div className="max-w-[1380px] mx-auto space-y-12">
-            <div className="max-w-3xl space-y-3">
+            <ScrollReveal className="max-w-3xl space-y-3">
               <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                {t.sections.s03Number} — DETERMINISTIC AST COMPILER
+                {t.sections.s03Number}. DETERMINISTIC AST COMPILER
               </div>
               <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                 {t.sections.s03Title}
@@ -1553,10 +1635,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
                 {t.sections.s03Subtitle}
               </p>
-            </div>
+            </ScrollReveal>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              {/* Left: Clickable Visual Blueprint Nodes */}
               <div className="lg:col-span-5 rounded-2xl bg-[#0B0B10] border border-white/[0.09] p-5 flex flex-col justify-between space-y-4">
                 <div className="text-xs font-mono text-zinc-400">
                   {t.sections.s03ClickNodeHint}
@@ -1584,30 +1665,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         meta: 'display: grid · cols: 3 · gap: 20px · @media 768px',
                       },
                     ] as const
-                  ).map((node) => (
-                    <button
-                      key={node.id}
-                      type="button"
-                      onClick={() => setActiveCodeNode(node.id)}
-                      className={`w-full p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        activeCodeNode === node.id
-                          ? 'bg-blue-600/15 border-blue-500/60 text-white shadow-lg'
-                          : 'bg-[#101017] border-white/[0.06] text-zinc-300 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-mono text-[11px] text-blue-400 mb-1">
-                        <span>{node.tag}</span>
-                        <span>AST NODE</span>
-                      </div>
-                      <div className="font-display font-bold text-sm mb-1">{node.title}</div>
-                      <div className="font-mono text-[11px] text-zinc-400">{node.meta}</div>
-                    </button>
+                  ).map((node, idx) => (
+                    <ScrollReveal key={node.id} delay={idx * 95}>
+                      <button
+                        type="button"
+                        onClick={() => setActiveCodeNode(node.id)}
+                        className={`sc-premium-card w-full p-4 rounded-xl border text-left transition-all cursor-pointer overflow-hidden ${
+                          activeCodeNode === node.id
+                            ? 'bg-blue-600/15 border-blue-500/60 text-white shadow-lg'
+                            : 'bg-[#101017] border-white/[0.06] text-zinc-300 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="sc-card-glow" />
+                        <div className="flex items-center justify-between font-mono text-[11px] text-blue-400 mb-1 relative z-10">
+                          <span>{node.tag}</span>
+                          <span>AST NODE</span>
+                        </div>
+                        <div className="font-display font-bold text-sm mb-1 relative z-10">
+                          {node.title}
+                        </div>
+                        <div className="font-mono text-[11px] text-zinc-400 relative z-10">
+                          {node.meta}
+                        </div>
+                      </button>
+                    </ScrollReveal>
                   ))}
                 </div>
               </div>
 
-              {/* Right: Live Compiled Code Output */}
-              <div className="lg:col-span-7 rounded-2xl bg-[#0A0A0F] border border-white/[0.1] overflow-hidden flex flex-col">
+              <ScrollReveal
+                delay={180}
+                className="lg:col-span-7 rounded-2xl bg-[#0A0A0F] border border-white/[0.1] overflow-hidden flex flex-col shadow-2xl"
+              >
                 <div className="h-11 px-4 bg-[#111118] border-b border-white/[0.08] flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     {(
@@ -1660,19 +1749,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <pre className="flex-1 p-6 font-mono text-xs sm:text-[13px] leading-relaxed text-zinc-200 overflow-x-auto">
                   <code>{codeSnippets[activeCodeNode][activeCodeLang]}</code>
                 </pre>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
 
         {/* ===================================================================
-            SECTION 04 — EVERY DETAIL MATTERS (3 Interactive Micro-Labs)
+            SECTION 04 — EVERY DETAIL MATTERS (4 Interactive Precision Cards)
         =================================================================== */}
         <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 bg-[#08080C] border-b border-white/[0.07]">
           <div className="max-w-[1380px] mx-auto space-y-12">
-            <div className="max-w-3xl space-y-3">
+            <ScrollReveal className="max-w-3xl space-y-3">
               <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                {t.sections.s04Number} — PRECISION MICRO-CONTROLS
+                {t.sections.s04Number}. PRECISION MICRO-CONTROLS
               </div>
               <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                 {t.sections.s04Title}
@@ -1680,241 +1769,312 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
                 {t.sections.s04Subtitle}
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Lab 1: Typography & Optical Rhythm */}
-              <div className="rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                    <span>01 · TYPOGRAPHY LAB</span>
-                    <Sliders className="w-3.5 h-3.5 text-blue-400" />
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-white">
-                    {t.sections.s04Card1Title}
-                  </h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    {t.sections.s04Card1Desc}
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-xl bg-[#07070A] border border-white/[0.07] min-h-[120px] flex items-center justify-center overflow-hidden">
-                  <div
-                    style={{
-                      fontSize: `${detailFontSize}px`,
-                      letterSpacing: `${detailTracking}em`,
-                    }}
-                    className="font-display font-extrabold text-white text-center leading-none transition-all"
-                  >
-                    Aa · Studio
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-xs tabular-nums">
-                  <div>
-                    <div className="flex justify-between text-zinc-400 mb-1">
-                      <span>{t.editor.fontSize}</span>
-                      <span className="font-mono text-white">{detailFontSize}px</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Card 1: Typography & Optical Rhythm */}
+              <ScrollReveal delay={0} className="h-full">
+                <div className="sc-premium-card h-full rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6 overflow-hidden">
+                  <div className="sc-card-glow" />
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                      <span>01 · TYPOGRAPHY LAB</span>
+                      <Sliders className="w-3.5 h-3.5 text-blue-400" />
                     </div>
-                    <input
-                      type="range"
-                      aria-label="Detail Font Size"
-                      min={24}
-                      max={52}
-                      value={detailFontSize}
-                      onChange={(e) => setDetailFontSize(Number(e.target.value))}
-                      className="w-full accent-white cursor-pointer"
-                    />
+                    <h3 className="font-display text-lg font-bold text-white">
+                      {t.sections.s04Card1Title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      {t.sections.s04Card1Desc}
+                    </p>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-zinc-400 mb-1">
-                      <span>{t.editor.letterSpacing}</span>
-                      <span className="font-mono text-white">{detailTracking}em</span>
-                    </div>
-                    <input
-                      type="range"
-                      aria-label="Detail Letter Spacing"
-                      min={-0.06}
-                      max={0.04}
-                      step={0.01}
-                      value={detailTracking}
-                      onChange={(e) => setDetailTracking(Number(e.target.value))}
-                      className="w-full accent-white cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Lab 2: Non-Destructive Image Crop & Surface */}
-              <div className="rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                    <span>02 · IMAGE CROP & SURFACE</span>
-                    <Crop className="w-3.5 h-3.5 text-blue-400" />
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-white">
-                    {t.sections.s04Card2Title}
-                  </h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    {t.sections.s04Card2Desc}
-                  </p>
-                </div>
-
-                <div
-                  style={{ borderRadius: `${detailRadius}px` }}
-                  className="h-36 w-full overflow-hidden border border-white/15 bg-black relative"
-                >
-                  <img
-                    src="/src/assets/images/template_restaurant_dining_1794725848428.jpg"
-                    alt="Crop Preview"
-                    style={{
-                      transform: `scale(${detailCropZoom})`,
-                    }}
-                    className="w-full h-full object-cover transition-transform duration-150"
-                  />
-                  <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/75 font-mono text-[10px] text-white">
-                    Zoom {Math.round(detailCropZoom * 100)}%
-                  </span>
-                </div>
-
-                <div className="space-y-3 text-xs tabular-nums">
-                  <div>
-                    <div className="flex justify-between text-zinc-400 mb-1">
-                      <span>{t.editor.cropZoom}</span>
-                      <span className="font-mono text-white">
-                        {Math.round(detailCropZoom * 100)}%
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      aria-label="Detail Crop Zoom"
-                      min={1}
-                      max={2.2}
-                      step={0.05}
-                      value={detailCropZoom}
-                      onChange={(e) => setDetailCropZoom(Number(e.target.value))}
-                      className="w-full accent-white cursor-pointer"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-zinc-400 mb-1">
-                      <span>{t.editor.borderRadius}</span>
-                      <span className="font-mono text-white">{detailRadius}px</span>
-                    </div>
-                    <input
-                      type="range"
-                      aria-label="Detail Border Radius"
-                      min={0}
-                      max={28}
-                      value={detailRadius}
-                      onChange={(e) => setDetailRadius(Number(e.target.value))}
-                      className="w-full accent-white cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Lab 3: Layer Hierarchy, Locking & Visibility */}
-              <div className="rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                    <span>03 · DOM TREE CONTROL</span>
-                    <Layers className="w-3.5 h-3.5 text-blue-400" />
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-white">
-                    {t.sections.s04Card3Title}
-                  </h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    {t.sections.s04Card3Desc}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  {detailLayers.map((layer) => (
+                  <div className="p-4 rounded-xl bg-[#07070A] border border-white/[0.07] min-h-[116px] flex items-center justify-center overflow-hidden relative z-10">
                     <div
-                      key={layer.id}
-                      className={`px-3 py-2.5 rounded-xl border flex items-center justify-between text-xs transition-colors ${
-                        layer.hidden
-                          ? 'bg-[#08080B] border-white/[0.04] text-zinc-600'
-                          : 'bg-[#12121A] border-white/[0.09] text-zinc-200'
-                      }`}
+                      style={{
+                        fontSize: `${detailFontSize}px`,
+                        letterSpacing: `${detailTracking}em`,
+                      }}
+                      className="font-display font-extrabold text-white text-center leading-none transition-all"
                     >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="font-mono text-[10px] text-zinc-500">{layer.type}</span>
-                        <span className="font-medium truncate">{layer.name}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          aria-label={`Toggle lock on ${layer.name}`}
-                          onClick={() =>
-                            setDetailLayers((prev) =>
-                              prev.map((l) =>
-                                l.id === layer.id ? { ...l, locked: !l.locked } : l
-                              )
-                            )
-                          }
-                          className={`p-1 rounded cursor-pointer ${
-                            layer.locked
-                              ? 'text-amber-400 bg-amber-500/10'
-                              : 'text-zinc-500 hover:text-white'
-                          }`}
-                        >
-                          {layer.locked ? (
-                            <Lock className="w-3.5 h-3.5" />
-                          ) : (
-                            <Unlock className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Toggle visibility on ${layer.name}`}
-                          onClick={() =>
-                            setDetailLayers((prev) =>
-                              prev.map((l) =>
-                                l.id === layer.id ? { ...l, hidden: !l.hidden } : l
-                              )
-                            )
-                          }
-                          className={`p-1 rounded cursor-pointer ${
-                            layer.hidden
-                              ? 'text-blue-400 bg-blue-500/10'
-                              : 'text-zinc-500 hover:text-white'
-                          }`}
-                        >
-                          {layer.hidden ? (
-                            <EyeOff className="w-3.5 h-3.5" />
-                          ) : (
-                            <Eye className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-                      </div>
+                      Aa · Studio
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div className="p-3 rounded-xl bg-[#07070A] border border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-zinc-400">
-                  <span>
-                    Active Layers: {detailLayers.filter((l) => !l.hidden).length} / 3
-                  </span>
-                  <span>
-                    Locked: {detailLayers.filter((l) => l.locked).length}
-                  </span>
+                  <div className="space-y-3 text-xs tabular-nums relative z-10">
+                    <div>
+                      <div className="flex justify-between text-zinc-400 mb-1">
+                        <span>{t.editor.fontSize}</span>
+                        <span className="font-mono text-white">{detailFontSize}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        aria-label="Detail Font Size"
+                        min={24}
+                        max={48}
+                        value={detailFontSize}
+                        onChange={(e) => setDetailFontSize(Number(e.target.value))}
+                        className="w-full accent-white cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-zinc-400 mb-1">
+                        <span>{t.editor.letterSpacing}</span>
+                        <span className="font-mono text-white">{detailTracking}em</span>
+                      </div>
+                      <input
+                        type="range"
+                        aria-label="Detail Letter Spacing"
+                        min={-0.06}
+                        max={0.04}
+                        step={0.01}
+                        value={detailTracking}
+                        onChange={(e) => setDetailTracking(Number(e.target.value))}
+                        className="w-full accent-white cursor-pointer"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
+
+              {/* Card 2: Non-Destructive Image Crop & Surface */}
+              <ScrollReveal delay={110} className="h-full">
+                <div className="sc-premium-card h-full rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6 overflow-hidden">
+                  <div className="sc-card-glow" />
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                      <span>02 · IMAGE CROP</span>
+                      <Crop className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <h3 className="font-display text-lg font-bold text-white">
+                      {t.sections.s04Card2Title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      {t.sections.s04Card2Desc}
+                    </p>
+                  </div>
+
+                  <div
+                    style={{ borderRadius: `${detailRadius}px` }}
+                    className="h-32 w-full overflow-hidden border border-white/15 bg-black relative z-10"
+                  >
+                    <img
+                      src="/src/assets/images/template_restaurant_dining_1794725848428.jpg"
+                      alt="Crop Preview"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        transform: `scale(${detailCropZoom})`,
+                      }}
+                      className="w-full h-full object-cover transition-transform duration-150"
+                    />
+                    <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/75 font-mono text-[10px] text-white">
+                      Zoom {Math.round(detailCropZoom * 100)}%
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 text-xs tabular-nums relative z-10">
+                    <div>
+                      <div className="flex justify-between text-zinc-400 mb-1">
+                        <span>{t.editor.cropZoom}</span>
+                        <span className="font-mono text-white">
+                          {Math.round(detailCropZoom * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        aria-label="Detail Crop Zoom"
+                        min={1}
+                        max={2.2}
+                        step={0.05}
+                        value={detailCropZoom}
+                        onChange={(e) => setDetailCropZoom(Number(e.target.value))}
+                        className="w-full accent-white cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-zinc-400 mb-1">
+                        <span>{t.editor.borderRadius}</span>
+                        <span className="font-mono text-white">{detailRadius}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        aria-label="Detail Border Radius"
+                        min={0}
+                        max={28}
+                        value={detailRadius}
+                        onChange={(e) => setDetailRadius(Number(e.target.value))}
+                        className="w-full accent-white cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Card 3: Layer Hierarchy, Locking & Visibility */}
+              <ScrollReveal delay={220} className="h-full">
+                <div className="sc-premium-card h-full rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6 overflow-hidden">
+                  <div className="sc-card-glow" />
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                      <span>03 · DOM LAYERS</span>
+                      <Layers className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <h3 className="font-display text-lg font-bold text-white">
+                      {t.sections.s04Card3Title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      {t.sections.s04Card3Desc}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 relative z-10">
+                    {detailLayers.map((layer) => (
+                      <div
+                        key={layer.id}
+                        className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs transition-colors ${
+                          layer.hidden
+                            ? 'bg-[#08080B] border-white/[0.04] text-zinc-600'
+                            : 'bg-[#12121A] border-white/[0.09] text-zinc-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="font-mono text-[10px] text-zinc-500">{layer.type}</span>
+                          <span className="font-medium truncate">{layer.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            aria-label={`Toggle lock on ${layer.name}`}
+                            onClick={() =>
+                              setDetailLayers((prev) =>
+                                prev.map((l) =>
+                                  l.id === layer.id ? { ...l, locked: !l.locked } : l
+                                )
+                              )
+                            }
+                            className={`p-1 rounded cursor-pointer ${
+                              layer.locked
+                                ? 'text-amber-400 bg-amber-500/10'
+                                : 'text-zinc-500 hover:text-white'
+                            }`}
+                          >
+                            {layer.locked ? (
+                              <Lock className="w-3.5 h-3.5" />
+                            ) : (
+                              <Unlock className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Toggle visibility on ${layer.name}`}
+                            onClick={() =>
+                              setDetailLayers((prev) =>
+                                prev.map((l) =>
+                                  l.id === layer.id ? { ...l, hidden: !l.hidden } : l
+                                )
+                              )
+                            }
+                            className={`p-1 rounded cursor-pointer ${
+                              layer.hidden
+                                ? 'text-blue-400 bg-blue-500/10'
+                                : 'text-zinc-500 hover:text-white'
+                            }`}
+                          >
+                            {layer.hidden ? (
+                              <EyeOff className="w-3.5 h-3.5" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#07070A] border border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-zinc-400 relative z-10">
+                    <span>
+                      Active: {detailLayers.filter((l) => !l.hidden).length}/3
+                    </span>
+                    <span>
+                      Locked: {detailLayers.filter((l) => l.locked).length}
+                    </span>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Card 4: 1-Click Production ZIP & Asset Bundler */}
+              <ScrollReveal delay={330} className="h-full">
+                <div className="sc-premium-card h-full rounded-2xl bg-[#0D0D13] border border-white/[0.09] p-6 flex flex-col justify-between space-y-6 overflow-hidden">
+                  <div className="sc-card-glow" />
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                      <span>04 · CODE & ZIP BUNDLE</span>
+                      <Code2 className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <h3 className="font-display text-lg font-bold text-white">
+                      {t.sections.s04Card4Title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      {t.sections.s04Card4Desc}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-[#07070A] border border-white/[0.07] font-mono text-[11px] text-zinc-300 space-y-1.5 relative z-10">
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>index.html + styles.css</span>
+                      <span className="text-emerald-400">✓ Ready</span>
+                    </div>
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>App.tsx (React 19)</span>
+                      <span className="text-emerald-400">✓ Ready</span>
+                    </div>
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>/assets/images/*</span>
+                      <span className="text-blue-400">Bundled</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 relative z-10">
+                    <div className="grid grid-cols-3 gap-1.5 bg-[#08080C] p-1 rounded-lg border border-white/[0.06] font-mono text-[10px]">
+                      {(['zip', 'react', 'html'] as const).map((fmt) => (
+                        <button
+                          key={fmt}
+                          type="button"
+                          onClick={() => setDetailExportFormat(fmt)}
+                          className={`py-1 rounded uppercase cursor-pointer transition-colors ${
+                            detailExportFormat === fmt
+                              ? 'bg-white text-black font-bold'
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          {fmt}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={onStartBuilding}
+                      className="w-full py-2 px-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{t.editor.exportZipBtn}</span>
+                    </button>
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </section>
 
         {/* ===================================================================
-            SECTION 05 — RESPONSIVE BY DEFAULT (#8)
+            SECTION 05 — RESPONSIVE BY DEFAULT
         =================================================================== */}
         <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07]">
           <div className="max-w-[1380px] mx-auto space-y-10">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <ScrollReveal className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
                 <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                  {t.sections.s05Number} — ADAPTIVE BREAKPOINT ENGINE
+                  {t.sections.s05Number}. ADAPTIVE BREAKPOINT ENGINE
                 </div>
                 <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                   {t.sections.s05Title}
@@ -1953,10 +2113,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   );
                 })}
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Morphing Responsive Viewport Container */}
-            <div className="rounded-2xl bg-[#09090E] border border-white/[0.08] p-6 sm:p-10 flex justify-center overflow-hidden">
+            <ScrollReveal
+              delay={120}
+              className="rounded-2xl bg-[#09090E] border border-white/[0.08] p-6 sm:p-10 flex justify-center overflow-hidden"
+            >
               <motion.div
                 layout
                 transition={{ type: 'spring', stiffness: 220, damping: 26 }}
@@ -2014,7 +2176,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="p-4 rounded-lg bg-[#09090D] border border-white/[0.07]"
+                      className="sc-premium-card p-4 rounded-lg bg-[#09090D] border border-white/[0.07]"
                     >
                       <div className="font-mono text-xl font-bold text-white tabular-nums">
                         {item.kpi}
@@ -2024,7 +2186,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   ))}
                 </div>
               </motion.div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -2036,10 +2198,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           className="py-20 lg:py-28 px-4 sm:px-6 lg:px-10 border-b border-white/[0.07]"
         >
           <div className="max-w-[1380px] mx-auto space-y-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="space-y-3 max-w-2xl">
                 <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
-                  {t.sections.s06Number} — {t.templatesSection.kicker}
+                  {t.sections.s06Number}. {t.templatesSection.kicker}
                 </div>
                 <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
                   {t.sections.s06Title}
@@ -2051,14 +2213,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="button"
                 onClick={onOpenDashboard}
-                className="px-5 py-2.5 text-xs font-semibold text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-white/10 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer self-start md:self-auto"
+                className="px-5 py-2.5 text-xs font-semibold text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-white/10 rounded-xl transition-all hover:-translate-y-0.5 whitespace-nowrap shrink-0 cursor-pointer self-start md:self-auto"
               >
                 {t.templatesSection.openDashboard}
               </button>
-            </div>
+            </ScrollReveal>
 
-            {/* Category Filter Bar */}
-            <div className="flex flex-wrap items-center gap-2">
+            <ScrollReveal delay={70} className="flex flex-wrap items-center gap-2">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -2073,74 +2234,115 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {cat === 'ALL' ? t.templatesSection.filterAll : cat}
                 </button>
               ))}
-            </div>
+            </ScrollReveal>
 
-            {/* Templates Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleTemplates.map((tpl) => (
-                <article
-                  key={tpl.id}
-                  className="rounded-2xl bg-[#0C0C12] border border-white/[0.08] hover:border-white/[0.22] overflow-hidden flex flex-col justify-between transition-all group"
-                >
-                  <div>
-                    <div className="relative h-52 overflow-hidden bg-zinc-950 border-b border-white/[0.06]">
-                      <img
-                        src={tpl.previewImage}
-                        alt={tpl.name}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C12] via-transparent to-transparent opacity-85" />
-                      <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-200 bg-black/75 px-2.5 py-1 rounded border border-white/10">
-                          {tpl.category}
-                        </span>
-                        <span className="text-[10px] font-mono text-zinc-400">
-                          {t.templatesSection.editableJson}
-                        </span>
+              {visibleTemplates.map((tpl, idx) => (
+                <ScrollReveal key={tpl.id} delay={idx * 95} className="h-full">
+                  <article className="sc-premium-card h-full rounded-2xl bg-[#0C0C12] border border-white/[0.08] overflow-hidden flex flex-col justify-between group">
+                    <div className="sc-card-glow" />
+                    <div className="relative z-10">
+                      <div className="relative h-52 overflow-hidden bg-zinc-950 border-b border-white/[0.06]">
+                        <img
+                          src={tpl.previewImage}
+                          alt={tpl.name}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C12] via-transparent to-transparent opacity-85" />
+                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] font-mono text-zinc-300">
+                          <span>{tpl.category}</span>
+                          <span className="sc-card-detail text-[10px] text-blue-400">
+                            {t.templatesSection.editableJson}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-5">
+                        <h3 className="text-lg font-bold text-white font-display mb-1.5">
+                          {tpl.name}
+                        </h3>
+                        <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                          {tpl.description}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="p-5">
-                      <h3 className="text-lg font-bold text-white font-display mb-1.5">
-                        {tpl.name}
-                      </h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {tpl.description}
-                      </p>
+                    <div className="px-5 pb-5 pt-2 flex items-center gap-2.5 relative z-10">
+                      <button
+                        type="button"
+                        aria-label={`Customize ${tpl.name} in Editor`}
+                        onClick={() => onSelectTemplate(tpl.id)}
+                        className="flex-1 py-2.5 px-3 bg-white hover:bg-zinc-200 text-black text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center whitespace-nowrap"
+                      >
+                        {t.templatesSection.customizeBtn}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Preview ${tpl.name}`}
+                        onClick={() => onPreviewTemplate(tpl)}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium rounded-lg border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{t.templatesSection.previewBtn}</span>
+                      </button>
                     </div>
-                  </div>
-
-                  <div className="px-5 pb-5 pt-2 flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      aria-label={`Customize ${tpl.name} in Editor`}
-                      onClick={() => onSelectTemplate(tpl.id)}
-                      className="flex-1 py-2.5 px-3 bg-white hover:bg-zinc-200 text-black text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center whitespace-nowrap"
-                    >
-                      {t.templatesSection.customizeBtn}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Preview ${tpl.name}`}
-                      onClick={() => onPreviewTemplate(tpl)}
-                      className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium rounded-lg border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>{t.templatesSection.previewBtn}</span>
-                    </button>
-                  </div>
-                </article>
+                  </article>
+                </ScrollReveal>
               ))}
             </div>
           </div>
         </section>
+
+        {/* ===================================================================
+            DEDICATED CONVERSION CTA SECTION (Scroll Reveal)
+        =================================================================== */}
+        <section className="relative py-20 lg:py-28 px-4 sm:px-6 lg:px-10 bg-[#08080D] border-b border-white/[0.07] overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-[680px] h-[300px] rounded-full bg-blue-600/[0.08] blur-[130px]" />
+          </div>
+
+          <ScrollReveal className="max-w-4xl mx-auto relative z-10 rounded-3xl bg-gradient-to-b from-[#111119] to-[#0A0A10] border border-white/[0.12] p-8 sm:p-14 text-center space-y-6 shadow-[0_28px_80px_rgba(0,0,0,0.85)]">
+            <div className="font-mono text-xs uppercase tracking-[0.2em] text-blue-400">
+              {t.sections.finalCtaKicker}
+            </div>
+            <h2 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-2xl mx-auto leading-[1.06]">
+              {t.sections.finalCtaTitle}
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-300 max-w-xl mx-auto leading-relaxed">
+              {t.sections.finalCtaSubtitle}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+              <button
+                type="button"
+                onClick={onStartBuilding}
+                className="px-6 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-semibold flex items-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5 shadow-lg"
+              >
+                <span>{t.sections.finalCtaPrimary}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onOpenDashboard}
+                className="px-6 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/15 text-zinc-200 text-sm font-medium cursor-pointer transition-all hover:-translate-y-0.5"
+              >
+                {t.sections.finalCtaSecondary}
+              </button>
+            </div>
+          </ScrollReveal>
+        </section>
       </main>
 
       {/* =====================================================================
-          MINIMAL ARCHITECTURAL FOOTER
+          MINIMAL ARCHITECTURAL FOOTER (Scroll Reveal)
       ===================================================================== */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-10 bg-[#050507] text-xs text-zinc-500">
+      <ScrollReveal
+        as="footer"
+        className="py-12 px-4 sm:px-6 lg:px-10 bg-[#050507] text-xs text-zinc-500"
+      >
         <div className="max-w-[1380px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1.5">
             <div className="font-extrabold text-white tracking-tight font-display text-sm flex items-center gap-2">
@@ -2185,7 +2387,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             © {new Date().getFullYear()} {t.footer.rights}
           </div>
         </div>
-      </footer>
+      </ScrollReveal>
     </div>
   );
 };

@@ -106,6 +106,9 @@ export const translations = {
       s04Card3Title: 'Слои, блокировка и группы',
       s04Card3Desc:
         'Контекстное меню, блокировка от случайного сдвига, скрытие слоёв и вложенные Flexbox/Grid контейнеры.',
+      s04Card4Title: 'Экспорт ZIP и живой код',
+      s04Card4Desc:
+        'Мгновенная сборка готового архива с HTML5, CSS3, JS, React-компонентами и всеми локальными изображениями.',
       s05Number: '05',
       s05Title: 'Responsive by default.',
       s05Subtitle:
@@ -115,6 +118,46 @@ export const translations = {
       s06Title: 'Start with an idea.',
       s06Subtitle:
         'Выберите одну из 6 продуманных архитектурных систем или начните с чистого холста — каждый шаблон полностью открыт для редактирования.',
+      coreCardsKicker: 'КЛЮЧЕВАЯ АРХИТЕКТУРА ПЛАТФОРМЫ',
+      coreCardsTitle: 'Четыре столпа инженерной точности.',
+      coreCardsSubtitle:
+        'От свободного проектирования на холсте до мгновенной компиляции производственного кода.',
+      coreCards: [
+        {
+          id: '01',
+          tag: 'VISUAL STUDIO',
+          title: 'Свободный визуальный холст',
+          desc: 'Перетаскивание (Drag & Resize), магнитные направляющие, правая панель в стиле ArtCraft и дерево DOM-слоёв.',
+          metric: '60 FPS Canvas',
+        },
+        {
+          id: '02',
+          tag: 'AI ENGINE',
+          title: 'Интеллектуальный ИИ-синтез',
+          desc: 'Генерация и точечная модификация блоков естественным языком на русском и английском с предпросмотром Diff.',
+          metric: 'DeepSeek + Local AST',
+        },
+        {
+          id: '03',
+          tag: 'CODE COMPILER',
+          title: 'Чистая компиляция в код',
+          desc: 'Детерминированная генерация семантического HTML5, адаптивного CSS3, чистого JS и готовых React-компонентов.',
+          metric: 'Zero Lock-in',
+        },
+        {
+          id: '04',
+          tag: 'INSTANT DELIVERY',
+          title: 'Ресурсы и экспорт в 1 клик',
+          desc: 'Загрузка собственных PNG/JPG/WebP/SVG, кадрирование в рамке и скачивание полного готового проекта в ZIP.',
+          metric: 'ZIP + Assets Bundle',
+        },
+      ],
+      finalCtaKicker: 'ГОТОВЫ К ЗАПУСКУ',
+      finalCtaTitle: 'Превратите идею в готовый сайт прямо сейчас.',
+      finalCtaSubtitle:
+        'Откройте визуальную студию SITECRAFT, протестируйте ИИ-ассистента и скачайте чистый производственный код за считанные минуты.',
+      finalCtaPrimary: 'Открыть визуальный редактор',
+      finalCtaSecondary: 'Перейти к проектам',
     },
     templatesSection: {
       kicker: 'БИБЛИОТЕКА ШАБЛОНОВ',
@@ -481,6 +524,9 @@ export const translations = {
       s04Card3Title: 'Layer Hierarchy & Locking',
       s04Card3Desc:
         'Right-click context menus, layer locking, visibility toggles, and nested Flexbox/Grid containers.',
+      s04Card4Title: '1-Click ZIP & Asset Bundle',
+      s04Card4Desc:
+        'Package your entire multi-page site with semantic HTML5, CSS3, JS, React JSX, and custom uploaded media.',
       s05Number: '05',
       s05Title: 'Responsive by default.',
       s05Subtitle:
@@ -490,6 +536,46 @@ export const translations = {
       s06Title: 'Start with an idea.',
       s06Subtitle:
         'Launch immediately from 6 architectural industry templates or a blank frame — every layout is 100% customizable in the Visual Editor.',
+      coreCardsKicker: 'CORE PLATFORM ARCHITECTURE',
+      coreCardsTitle: 'Four pillars of visual engineering.',
+      coreCardsSubtitle:
+        'From freeform spatial manipulation on the canvas to deterministic production code compilation.',
+      coreCards: [
+        {
+          id: '01',
+          tag: 'VISUAL STUDIO',
+          title: 'Freeform Spatial Canvas',
+          desc: 'Direct drag & resize manipulation, magnetic snap axes, ArtCraft-inspired vertical tool rail, and full DOM layer tree.',
+          metric: '60 FPS Canvas',
+        },
+        {
+          id: '02',
+          tag: 'AI ENGINE',
+          title: 'Intelligent AI Synthesis',
+          desc: 'Generate or refine individual layers using natural language in Russian or English with live Diff inspection.',
+          metric: 'DeepSeek + Local AST',
+        },
+        {
+          id: '03',
+          tag: 'CODE COMPILER',
+          title: 'Clean Code Compilation',
+          desc: 'Deterministic compilation into semantic HTML5, responsive CSS3, clean JavaScript, and modular React JSX.',
+          metric: 'Zero Lock-in',
+        },
+        {
+          id: '04',
+          tag: 'INSTANT DELIVERY',
+          title: 'Custom Assets & ZIP Export',
+          desc: 'Upload custom PNG/JPG/WebP/SVG media, crop non-destructively in frames, and export a complete production ZIP.',
+          metric: 'ZIP + Assets Bundle',
+        },
+      ],
+      finalCtaKicker: 'READY FOR PRODUCTION',
+      finalCtaTitle: 'Turn your vision into a live website today.',
+      finalCtaSubtitle:
+        'Launch the SITECRAFT Visual Studio, experiment with AI layout synthesis, and export clean production code in minutes.',
+      finalCtaPrimary: 'Launch Visual Studio',
+      finalCtaSecondary: 'Open Project Dashboard',
     },
     templatesSection: {
       kicker: 'PRODUCTION TEMPLATES',

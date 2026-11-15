@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,
@@ -1503,7 +1504,12 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
       {/* MAIN 3-COLUMN STUDIO WORKSPACE */}
       <div className="flex-1 flex overflow-hidden">
         {/* LEFT PANEL: Layers, Pages, Assets, Components, Templates */}
-        <aside className="w-72 bg-[#0E0E13] border-r border-zinc-800 flex flex-col shrink-0">
+        <motion.aside
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          className="w-72 bg-[#0E0E13] border-r border-zinc-800 flex flex-col shrink-0"
+        >
           {/* Left Panel Tabs */}
           <div className="grid grid-cols-5 border-b border-zinc-800 bg-[#0A0A0E] p-1 gap-0.5 text-[11px] font-medium">
             {(
@@ -1519,10 +1525,10 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setLeftTab(tab.id)}
-                className={`py-1.5 rounded text-center transition-colors cursor-pointer truncate ${
+                className={`py-1.5 rounded text-center transition-all duration-200 cursor-pointer truncate ${
                   leftTab === tab.id
-                    ? 'bg-zinc-800 text-white font-semibold'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
                 }`}
               >
                 {tab.label}
@@ -1531,7 +1537,13 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
           </div>
 
           {/* Left Panel Content */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          <motion.div
+            key={leftTab}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 overflow-y-auto p-3 space-y-3"
+          >
             {leftTab === 'layers' && (
               <>
                 <div className="flex items-center justify-between text-[11px] text-zinc-400 pb-2 border-b border-zinc-800/80">
@@ -1879,8 +1891,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                 ))}
               </div>
             )}
-          </div>
-        </aside>
+          </motion.div>
+        </motion.aside>
 
         {/* CENTER INTERACTIVE CANVAS */}
         <main
@@ -2088,7 +2100,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                     width: `${Math.round(artW * zoom)}px`,
                     height: `${Math.round(artH * zoom)}px`,
                   }}
-                  className="relative shrink-0"
+                  className="relative shrink-0 transition-all duration-300 ease-out"
                 >
                   <div
                     style={{
@@ -2097,7 +2109,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                       transform: `scale(${zoom})`,
                       transformOrigin: 'top left',
                     }}
-                    className="relative shadow-2xl border border-zinc-800 rounded-sm transition-transform duration-75"
+                    className="relative shadow-2xl border border-zinc-800 rounded-sm transition-all duration-300 ease-out"
                   >
                     {/* Snap Guide Line */}
                     {showGuides && snapGuide.x !== undefined && (
@@ -2116,10 +2128,13 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
 
           {/* Right-Click Context Menu */}
           {contextMenu && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
               style={{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }}
               onClick={(e) => e.stopPropagation()}
-              className="fixed z-50 w-48 py-1 bg-[#121218] border border-zinc-700 rounded-lg shadow-2xl text-xs text-zinc-200"
+              className="fixed z-50 w-48 py-1 bg-[#121218]/95 backdrop-blur-md border border-zinc-700 rounded-lg shadow-2xl text-xs text-zinc-200"
             >
               <button
                 type="button"
@@ -2235,21 +2250,26 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               >
                 {t.editor.contextMenu.delete}
               </button>
-            </div>
+            </motion.div>
           )}
         </main>
 
         {/* RIGHT PANEL: Dynamic Properties Inspector & AI Assistant */}
-        <aside className="w-80 bg-[#0E0E13] border-l border-zinc-800 flex flex-col shrink-0">
+        <motion.aside
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          className="w-80 bg-[#0E0E13] border-l border-zinc-800 flex flex-col shrink-0"
+        >
           {/* Right Panel Mode Switcher */}
           <div className="grid grid-cols-2 border-b border-zinc-800 bg-[#0A0A0E] p-1 gap-1 text-xs font-medium">
             <button
               type="button"
               onClick={() => setRightTab('inspector')}
-              className={`py-1.5 rounded text-center transition-colors cursor-pointer ${
+              className={`py-1.5 rounded text-center transition-all duration-200 cursor-pointer ${
                 rightTab === 'inspector'
-                  ? 'bg-zinc-800 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-xs'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
               }`}
             >
               {t.editor.tabProperties}
@@ -2257,10 +2277,10 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
             <button
               type="button"
               onClick={() => setRightTab('ai')}
-              className={`py-1.5 rounded text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+              className={`py-1.5 rounded text-center flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
                 rightTab === 'ai'
-                  ? 'bg-blue-600 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -2270,7 +2290,13 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
 
           {/* RIGHT PANEL BODY */}
           {rightTab === 'inspector' ? (
-            <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs">
+            <motion.div
+              key="inspector"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="flex-1 overflow-y-auto p-4 space-y-5 text-xs"
+            >
               {/* Active Breakpoint Banner */}
               {viewport !== 'desktop' && (
                 <div className="px-2.5 py-1.5 bg-blue-600/15 border border-blue-500/40 rounded text-[11px] text-blue-200 flex items-center justify-between">
@@ -3170,10 +3196,16 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ) : (
             /* AI ASSISTANT TAB */
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+            <motion.div
+              key="ai"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="flex-1 overflow-y-auto p-4 space-y-4 text-xs"
+            >
               <div className="p-3 bg-[#14141D] border border-zinc-800 rounded-lg space-y-1">
                 <div className="font-semibold text-white flex items-center justify-between">
                   <span>{t.ai.title}</span>
@@ -3393,12 +3425,15 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           )}
-        </aside>
+        </motion.aside>
 
         {/* ARTCRAFT-INSPIRED RIGHT VERTICAL TOOLBAR RAIL */}
-        <aside
+        <motion.aside
+          initial={{ opacity: 0, x: 18 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.36, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
           aria-label="Studio Right Vertical Toolbar"
           className="w-12 bg-[#09090D] border-l border-zinc-800/90 flex flex-col items-center py-2.5 gap-1.5 shrink-0 z-30"
         >
@@ -3431,17 +3466,20 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                   type="button"
                   aria-label={item.label}
                   onClick={item.onClick}
-                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${
                     item.active
-                      ? 'bg-white text-black shadow-sm'
+                      ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.28)]'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   {item.active && (
-                    <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white rounded-r" />
+                    <motion.span
+                      layoutId="studioRailActiveIndicator"
+                      className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white rounded-r"
+                    />
                   )}
-                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
                     <span>{item.label}</span>
                     <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
                       {item.shortcut}
@@ -3503,14 +3541,14 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                   type="button"
                   aria-label={item.label}
                   onClick={() => handleAddElement(item.type)}
-                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${
                     isAct
-                      ? 'bg-white text-black shadow-sm'
+                      ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.28)]'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                  <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
                     <span>{item.label}</span>
                     <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
                       {item.shortcut}
@@ -3568,17 +3606,17 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                   type="button"
                   aria-label={item.label}
                   onClick={item.onClick}
-                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                  className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${
                     item.active
-                      ? 'bg-blue-600/25 text-blue-300 border border-blue-500/40'
+                      ? 'bg-blue-600/25 text-blue-300 border border-blue-500/40 shadow-[0_0_14px_rgba(59,130,246,0.22)]'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   {item.active && (
                     <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-400" />
                   )}
-                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+                  <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
                     <span>{item.label}</span>
                     <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
                       {item.shortcut}
@@ -3594,10 +3632,10 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               type="button"
               aria-label={t.editor.railPreview}
               onClick={() => onOpenLivePreview(project)}
-              className="group relative w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+              className="group relative w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Eye className="w-4 h-4" />
-              <span className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
+              <Eye className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
+              <span className="pointer-events-none opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 absolute right-10 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#14141B] border border-zinc-700/80 text-[11px] font-medium text-zinc-100 whitespace-nowrap shadow-xl flex items-center gap-2 z-50">
                 <span>{t.editor.railPreview}</span>
                 <kbd className="px-1 py-0.5 text-[9px] font-mono bg-zinc-800 text-zinc-400 rounded">
                   P
@@ -3605,7 +3643,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               </span>
             </button>
           </div>
-        </aside>
+        </motion.aside>
       </div>
     </div>
   );
