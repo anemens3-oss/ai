@@ -1,0 +1,6 @@
+{
+  "name": "SITECRAFT",
+  "description": "Design once. Build instantly. Intelligent visual web design platform with AI code compilation, interactive Figma-grade canvas, and full ZIP export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
